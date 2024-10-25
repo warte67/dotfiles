@@ -1,0 +1,14 @@
+[
+    {
+        "key": "general:border_size",
+        "value": 3
+    },
+    {
+        "key": "decoration:rounding",
+        "value": 10
+    },
+    {
+        "key": "decoration:inactive_opacity",
+        "value": 0.9
+    }
+]

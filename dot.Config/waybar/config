@@ -29,7 +29,7 @@
         "cpu", 
         "memory", 
         "disk",
-        "keyboard-state", 
+        // "keyboard-state", 
         "battery", 
         "clock", 
         "tray",
