@@ -15,6 +15,9 @@ RESET=$(tput sgr0)
 # echo "${GREEN}Success:${RESET} Operation completed successfully."
 # echo "${YELLOW}Warning:${RESET} Proceed with caution."
 
+# ensure the 32-bit stuff is good to go for steam
+sudo dpkg --add-architecture i386
+
 # ensure admin privileges
 sudo echo
 
