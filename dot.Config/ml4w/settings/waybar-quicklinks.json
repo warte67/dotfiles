@@ -1,31 +1,42 @@
 {
+    // Hyprland Settings
     "custom/quicklink1": {
         "format": " ",
         "on-click": "~/.config/ml4w/apps/ML4W_Hyprland_Settings-x86_64.AppImage",
         "tooltip-format": "Open Hyprland Settings"
     }, 
+    // Firefox
     "custom/quicklink2": {
         "format": " ",
         "on-click": "~/.config/ml4w/settings/browser.sh",
         "tooltip-format": "Open the browser"
     },
+    // Nautilus
     "custom/quicklink3": {
         "format": " ",
         "on-click": "~/.config/ml4w/settings/filemanager.sh",
         "tooltip-format": "Open the filemanager"
     }, 
+    // Steam
     "custom/quicklink4": {
+        "format": " ",
+        "on-click": "steam",
+        "tooltip-format": "Open Steam"
+    }, 
+    // Visual Studio Code
+    "custom/quicklink5": {
         "format": " ",
         "on-click": "~/.config/ml4w/settings/vscode.sh",
         "tooltip-format": "Open Visual Studio Code"
     }, 
-    "custom/quicklink5": {
+    // GitHub Desktop
+    "custom/quicklink6": {
         "format": " ", //        
         "on-click": "~/.config/ml4w/settings/github-desktop.sh",
         "tooltip-format": "Open GitHub-Desktop"
     }, 
     //  Gnome Software       
-    "custom/quicklink6": {
+    "custom/quicklink7": {
         "format": " ", //        
         "on-click": "gnome-software",
         "tooltip-format": "Gnome Software"
@@ -41,6 +52,7 @@
             "custom/quicklink4",
             "custom/quicklink5",
             "custom/quicklink6",
+            "custom/quicklink7",
             "custom/quicklinkempty"
         ]
     }
