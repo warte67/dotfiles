@@ -420,7 +420,7 @@ nf-fa-bootstrap,ef95,
 nf-fa-box,ed75,
 nf-fa-braille,f2a1,
 nf-fa-brain,ee9c,
-nf-fa-briefcase,f0b1,
+nf-fa-briefcase,f0b1,
 nf-fa-broom,ede4,
 nf-fa-brush,ee26,
 nf-fa-btc,f15a,

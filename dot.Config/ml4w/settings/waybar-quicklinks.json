@@ -24,6 +24,12 @@
         "on-click": "~/.config/ml4w/settings/github-desktop.sh",
         "tooltip-format": "Open GitHub-Desktop"
     }, 
+    //  Gnome Software       
+    "custom/quicklink6": {
+        "format": " ", //        
+        "on-click": "gnome-software",
+        "tooltip-format": "Gnome Software"
+    }, 
     "custom/quicklinkempty": {
     }, 
     "group/quicklinks": {
@@ -34,6 +40,7 @@
             "custom/quicklink3",
             "custom/quicklink4",
             "custom/quicklink5",
+            "custom/quicklink6",
             "custom/quicklinkempty"
         ]
     }
