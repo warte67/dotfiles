@@ -1,0 +1,15 @@
+#!/bin/bash
+
+###########################
+# install microsoft fonts #
+###########################
+
+   # Ubuntu
+   ; sudo add-apt-repository multiverse
+
+   # Debian
+   sudo apt install software-properties-common -y
+
+   # install the stuff
+   sudo apt update && sudo apt install ttf-mscorefonts-installer
+   sudo fc-cache -f -v
