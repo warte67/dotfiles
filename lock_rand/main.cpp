@@ -9,7 +9,7 @@ int main()
 
     int n = (rand() % 6)+1;
 
-    std::cout << rand() << std::endl;
+    // std::cout << rand() << std::endl;
 
     // std::cout << "swaylock --image /home/jay/Pictures/Lock/lock-" << n << ".jpg" << std::endl;
 

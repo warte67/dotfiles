@@ -88,13 +88,13 @@
     // CPU 
     "cpu": {
         "format": " {usage}%   ",
-        "on-click": "gnome-terminal -- htop"
+        "on-click": "kitty -- htop"
     },
 
     // Memory 
     "memory": {
         "format": " {}%   ",
-        "on-click": "gnome-terminal -- htop"
+        "on-click": "kitty -- htop"
     },
 
     // Harddisc space used 
@@ -102,7 +102,7 @@
         "interval": 30,
         "format": " {percentage_used}%   ",
         "path": "/",
-        "on-click": "gnome-terminal -- htop"
+        "on-click": "kitty -- htop"
     }, 
 
     "hyprland/language": {
@@ -177,7 +177,7 @@
         "on-click": "pavucontrol"
     },
 
-    // Bluetooth  
+    // Bluetooth 
     "bluetooth": {
         "format-disabled": "",
         "format-off": "",   // 
