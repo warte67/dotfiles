@@ -30,16 +30,27 @@ $line_break$character"""
 palette = 'gruvbox_dark'
 
 [palettes.gruvbox_dark]
-color_fg0 = '#fbf1c7'       #           ORIGINAL	NEW
-color_orange = '#263d02'	# COLOR 1   #d65d0e		#263d02
-color_yellow = '#223602'	# COLOR 2   #d79921 	#223602
-color_aqua = '#1d2f01'		# COLOR 3   #689d6a		#1d2f01 
-color_blue = '#192801'		# COLOR 4   #458588		#192801
-color_bg3 = '#142100'		# COLOR 5   #665c54		#142100
-color_bg1 = '#101a00'		# COLOR 6   #3c3836     #101a00
-color_green = '#98971a'
-color_purple = '#b16286'
-color_red = '#cc241d'
+color_fg0 		= '#fbf1c7'
+color_green 	= '#98971a'		# COLOR #		ORIGINAL:		NEW:
+color_orange 	= '#445a0b'		# COLOR 1		445a0b			445a0b
+color_yellow 	= '#3b5009'		# COLOR 2		32410b			3b5009
+color_aqua 		= '#324608'		# COLOR 3		647a1b			324608
+color_blue 		= '#2a3c06'		# COLOR 4		425118			2a3c06
+color_bg3 		= '#223205'		# COLOR 5		32410b			223205
+color_bg1 		= '#1a2803'		# COLOR 6		203010			1a2803
+color_purple	= '#b16286'
+color_red 		= '#cc241d'
+
+#color_fg0 = '#fbf1c7'
+#color_bg1 = '#3c3836'
+#color_bg3 = '#665c54'
+#color_blue = '#458588'
+#color_aqua = '#689d6a'
+#color_green = '#98971a'
+#color_orange = '#d65d0e'
+#color_purple = '#b16286'
+#color_red = '#cc241d'
+#color_yellow = '#d79921'
 
 [os]
 disabled = false
@@ -63,10 +74,9 @@ Arch = "󰣇"
 Artix = "󰣇"
 EndeavourOS = ""
 CentOS = ""
-Debian = ""
+Debian = "󰣚"
 Redhat = "󱄛"
 RedHatEnterprise = "󱄛"
-Pop = ""
 
 [username]
 show_always = true
@@ -81,11 +91,11 @@ truncation_length = 3
 truncation_symbol = "…/"
 
 [directory.substitutions]
-"Documents" = "󰈙 "
-"Downloads" = " "
-"Music" = "󰝚 "
-"Pictures" = " "
-"Developer" = "󰲋 "
+#"Documents" = "󰈙 "
+#"Downloads" = " "
+#"Music" = "󰝚 "
+#"Pictures" = " "
+#"Developer" = "󰲋 "
 
 [git_branch]
 symbol = ""
@@ -122,7 +132,7 @@ style = "bg:color_blue"
 format = '[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)'
 
 [java]
-symbol = ""
+symbol = " "
 style = "bg:color_blue"
 format = '[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)'
 
@@ -152,7 +162,7 @@ format = '[[ $symbol( $environment) ](fg:#83a598 bg:color_bg3)]($style)'
 
 [time]
 disabled = false
-time_format = "%a %-I:%M %p"   # "%R"
+time_format = "%R"
 style = "bg:color_bg1"
 format = '[[  $time ](fg:color_fg0 bg:color_bg1)]($style)'
 
