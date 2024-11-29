@@ -1,0 +1,9 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/jay/Documents/GitHub/dotfiles/lock_rand",
+            "binaryPath": "/home/jay/Documents/GitHub/dotfiles/lock_rand/lock_rand",
+            "binaryArgs": []
+        }
+    ]
+}
