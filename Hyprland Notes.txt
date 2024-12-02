@@ -1,0 +1,9 @@
+Hyprland Notes:
+
+Don't go crazy installing stuff right away, CachyOS has really good
+defaults.
+
+Be sure to install:
+
+- gnome-keyring
+    sudo  pacman -S gnome-keyring
