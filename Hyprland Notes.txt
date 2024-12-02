@@ -7,3 +7,8 @@ Be sure to install:
 
 - gnome-keyring
     sudo  pacman -S gnome-keyring
+
+- Power Management on the Laptop:
+    sudo pacman -S tlp powertop
+    sudo systemctl enable tlp
+    sudo systemctl start tlp
