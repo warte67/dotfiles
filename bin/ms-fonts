@@ -1,24 +1,97 @@
 #!/bin/bash
 
-###########################
-# install microsoft fonts #
-###########################
+set -e  # Exit immediately if a command exits with a non-zero status.
 
-   # Ubuntu
-   # sudo add-apt-repository multiverse
+# Function to check for root privileges
+check_root() {
+    if [ "$(id -u)" -ne 0 ]; then
+        echo "Please run this script as root or with sudo."
+        exit 1
+    fi
+}
 
-   # Debian
-   # sudo apt install software-properties-common -y
+# Function to install on Ubuntu/Debian
+install_on_ubuntu() {
+    echo "Detected Ubuntu/Debian."
+    sudo apt update
+    if ! sudo apt install -y ttf-mscorefonts-installer; then
+        echo "Font installation failed on Ubuntu/Debian."
+        exit 1
+    fi
+    sudo debconf-set-selections <<< "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula boolean true"
+    sudo fc-cache -f -v
+    if [ $? -eq 0 ]; then
+        echo "Microsoft Core Fonts installed successfully on Ubuntu/Debian."
+    else
+        echo "Font cache update failed on Ubuntu/Debian."
+        exit 1
+    fi
+}
 
-   # install the stuff
-   #sudo apt update && sudo apt install ttf-mscorefonts-installer
-   
-   # POP_OS 24.04
-   # https://packages.debian.org/search?keywords=ttf-mscorefonts-installer
-   wget http://ftp.us.debian.org/debian/pool/contrib/m/msttcorefonts/ttf-mscorefonts-installer_3.8_all.deb
-   sudo dpkg -i ttf-mscorefonts-installer_3.8_all.deb
-   
-   
-   
-   
-   sudo fc-cache -f -v
+# Function to install on Fedora
+install_on_fedora() {
+    echo "Detected Fedora."
+    sudo dnf install -y curl cabextract xorg-x11-font-utils fontconfig
+    if ! sudo dnf install -y https://downloads.sourceforge.net/project/mscorefonts2/rpms/msttcorefonts-2.5-1.noarch.rpm; then
+        echo "Font installation failed on Fedora."
+        exit 1
+    fi
+    sudo fc-cache -f -v
+    if [ $? -eq 0 ]; then
+        echo "Microsoft Core Fonts installed successfully on Fedora."
+    else
+        echo "Font cache update failed on Fedora."
+        exit 1
+    fi
+}
+
+# Function to install on Arch/Manjaro
+install_on_arch() {
+    echo "Detected Arch/Manjaro."
+    if ! command -v yay &> /dev/null; then
+        echo "Yay (Yet Another Yaourt) is required to install AUR packages. Please install yay and rerun the script."
+        exit 1
+    fi
+    if ! yay -S --noconfirm ttf-ms-fonts; then
+        echo "Font installation failed on Arch/Manjaro."
+        exit 1
+    fi
+    sudo fc-cache -f -v
+    if [ $? -eq 0 ]; then
+        echo "Microsoft Core Fonts installed successfully on Arch/Manjaro."
+    else
+        echo "Font cache update failed on Arch/Manjaro."
+        exit 1
+    fi
+}
+
+# Function to detect Linux distribution
+detect_distro_and_install() {
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        case "$ID" in
+            ubuntu|debian)
+                install_on_ubuntu
+                ;;
+            fedora)
+                install_on_fedora
+                ;;
+            arch|manjaro)
+                install_on_arch
+                ;;
+            *)
+                echo "Unsupported Linux distribution: $ID"
+                exit 1
+                ;;
+        esac
+    else
+        echo "Unable to detect Linux distribution."
+        exit 1
+    fi
+}
+
+
+# Main script execution
+check_root
+detect_distro_and_install
+
