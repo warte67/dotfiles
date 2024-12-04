@@ -7,6 +7,8 @@ Be sure to install:
 
 - gnome-keyring
     sudo  pacman -S gnome-keyring
+    or possibly
+    xdg-desktop-portal-hyprland
 
 - Power Management on the Laptop:
     sudo pacman -S tlp powertop
