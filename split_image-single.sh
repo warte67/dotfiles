@@ -24,16 +24,16 @@ total_width=7040
 height=2560
 
 # Resize the input image to the final size (7040x2560)
-convert "$input_image" -resize ${total_width}x${height}^ "$input_image_resized.jpg"
+magick "$input_image" -resize ${total_width}x${height}^ "$input_image_resized.jpg"
 
 # Crop left section (1440x2560) from the resized image
-convert "$input_image_resized.jpg" -crop 1440x2560+0+0 "$left_output"
+magick "$input_image_resized.jpg" -crop 1440x2560+0+0 "$left_output"
 
 # Crop middle section (3072x1728) from the resized image
-convert "$input_image_resized.jpg" -crop 3072x1728+1440+460 "$middle_output"
+magick "$input_image_resized.jpg" -crop 3072x1728+1440+450 "$middle_output"
 
 # Crop right section (2560x1440) from the resized image
-convert "$input_image_resized.jpg" -crop 2560x1440+4512+700 "$right_output"
+magick "$input_image_resized.jpg" -crop 2560x1440+4512+720 "$right_output"
 
 # Clean up the resized image
 rm "$input_image_resized.jpg"
