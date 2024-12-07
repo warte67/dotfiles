@@ -76,7 +76,7 @@ detect_distro_and_install() {
             fedora)
                 install_on_fedora
                 ;;
-            arch|manjaro)
+            arch|manjaro|cachyos)
                 install_on_arch
                 ;;
             *)
