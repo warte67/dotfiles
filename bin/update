@@ -72,7 +72,9 @@ if command -v flatpak &> /dev/null; then
   echo "${YELLOW}sudo flatpak update -y${RESET}"
   echo ""
   sudo flatpak update -y
-  sudo apt autoremove
+  if command -v apt &> /dev/null; then
+    sudo apt autoremove
+  fi
   echo ""
 else
   echo "${GREEN}<<<${BLUE}=== ${WHITE}FLATPAK IS NOT INSTALLED ${BLUE}===${GREEN}>>>${RESET}"
