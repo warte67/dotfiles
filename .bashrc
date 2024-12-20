@@ -117,6 +117,8 @@ elif [[ "$(hostname)" == "framework" ]]; then
     sed -i 's/^palette = .*/palette = "olive"/' $STARSHIP_TOML
 elif [[ "$(hostname)" == "tux" ]]; then
     sed -i 's/^palette = .*/palette = "purple"/' $STARSHIP_TOML
+elif [[ "$(hostname)" == "Mint22-vm" ]]; then
+    sed -i 's/^palette = .*/palette = "green"/' $STARSHIP_TOML
 else
     sed -i 's/^palette = .*/palette = "gray"/' $STARSHIP_TOML
 fi
