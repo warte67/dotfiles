@@ -113,12 +113,16 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 STARSHIP_TOML="$HOME/.config/starship.toml"
 if [[ "$(hostname)" == "coffee-table" ]]; then
     sed -i 's/^palette = .*/palette = "teal"/' $STARSHIP_TOML
+
 elif [[ "$(hostname)" == "framework" ]]; then
-    sed -i 's/^palette = .*/palette = "olive"/' $STARSHIP_TOML
+    sed -i 's/^palette = .*/palette = "violet"/' $STARSHIP_TOML
+
 elif [[ "$(hostname)" == "tux" ]]; then
-    sed -i 's/^palette = .*/palette = "purple"/' $STARSHIP_TOML
+    sed -i 's/^palette = .*/palette = "olive"/' $STARSHIP_TOML
+
 elif [[ "$(hostname)" == "Mint22-vm" ]]; then
     sed -i 's/^palette = .*/palette = "green"/' $STARSHIP_TOML
+
 else
     sed -i 's/^palette = .*/palette = "default"/' $STARSHIP_TOML
 fi
