@@ -6,15 +6,15 @@
 #    `----'  `--'   `--`--'`--'   `----' `--' `--'`--'|  |-' '--'`--'   `---' `--`--`--'`--'
 #                                                     `--'
 #
-# # Example for setting environment variables based on hostname
-# if [[ "$(hostname)" == "coffee-table" ]]; then
-# export STARSHIP_COLOR_SCHEME="teal"
-# elif [[ "$(hostname)" == "framework" ]]; then
-# export STARSHIP_COLOR_SCHEME="olive"
-# else
-# export STARSHIP_COLOR_SCHEME="default"
-# fi
-# eval "$(starship init bash)"
+        # # Example for setting environment variables based on hostname
+        # if [[ "$(hostname)" == "coffee-table" ]]; then
+        # export STARSHIP_COLOR_SCHEME="teal"
+        # elif [[ "$(hostname)" == "framework" ]]; then
+        # export STARSHIP_COLOR_SCHEME="olive"
+        # else
+        # export STARSHIP_COLOR_SCHEME="default"
+        # fi
+        # eval "$(starship init bash)"
 #
 
 "$schema" = 'https://starship.rs/config-schema.json'
