@@ -120,7 +120,7 @@ elif [[ "$(hostname)" == "tux" ]]; then
 elif [[ "$(hostname)" == "Mint22-vm" ]]; then
     sed -i 's/^palette = .*/palette = "green"/' $STARSHIP_TOML
 else
-    sed -i 's/^palette = .*/palette = "gray"/' $STARSHIP_TOML
+    sed -i 's/^palette = .*/palette = "default"/' $STARSHIP_TOML
 fi
 eval "$(starship init bash)"
 

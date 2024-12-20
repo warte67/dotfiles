@@ -35,7 +35,7 @@ $time\
 [ ](fg:color_bg1)\
 $line_break$character"""
 
-# available colors:  blue, green, red, violet, brown, teal, purple, olive, or gray
+# available colors:  blue, green, red, violet, brown, teal, purple, olive, gray, or default
 palette = "olive"
 
 
@@ -59,6 +59,8 @@ purple = { color_fg0 = '#fbf1c7', color_green = '#981a97', color_orange = '#440b
 olive = { color_fg0 = '#fbf1c7', color_green = '#98971a', color_orange = '#445a0b', color_yellow = '#3b5009', color_aqua = '#324608', color_blue = '#2a3c06', color_bg3 = '#223205', color_bg1 = '#1a2803', color_purple = '#b16286', color_red = '#cc241d' }
 
 gray = { color_fg0 = '#efefef', color_green = '#898989', color_orange = '#4b4b4b', color_yellow = '#424242', color_aqua = '#393939', color_blue = '#303030', color_bg3 = '#282828', color_bg1 = '#1f1f1f', color_purple = '#7f7f7f', color_red = '#555555' }
+
+default = { color_fg0 = '#efefef', color_green = '#898989', color_orange = '#4b4b4b', color_yellow = '#424242', color_aqua = '#393939', color_blue = '#303030', color_bg3 = '#282828', color_bg1 = '#1f1f1f', color_purple = '#7f7f7f', color_red = '#555555' }
 
 
 [os]
