@@ -97,11 +97,19 @@ export LESS="-R"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-# Starship Prompt
-#
-# available colors:  blue, green, red, violet, brown, teal, purple, olive, gray, or default
-#
-# sed -i 's/^palette = .*/palette = "blue"/' test.toml
+
+##################################################################################
+#   ____  _                 _     _         ____                            _    #
+#  / ___|| |_ __ _ _ __ ___| |__ (_)_ __   |  _ \ _ __ ___  _ __ ___  _ __ | |_  #
+#  \___ \| __/ _` | '__/ __| '_ \| | '_ \  | |_) | '__/ _ \| '_ ` _ \| '_ \| __| #
+#   ___) | || (_| | |  \__ \ | | | | |_) | |  __/| | | (_) | | | | | | |_) | |_  #
+#  |____/ \__\__,_|_|  |___/_| |_|_| .__/  |_|   |_|  \___/|_| |_| |_| .__/ \__| #
+#                                  |_|                               |_|         #
+#                                                                                #
+# Available Colors:                                                              #
+#   blue, green, red, violet, brown, teal, purple, olive, gray, or default       #
+#                                                                                #
+##################################################################################
 STARSHIP_TOML="$HOME/.config/starship.toml"
 if [[ "$(hostname)" == "coffee-table" ]]; then
     sed -i 's/^palette = .*/palette = "teal"/' $STARSHIP_TOML
@@ -113,4 +121,6 @@ else
     sed -i 's/^palette = .*/palette = "gray"/' $STARSHIP_TOML
 fi
 eval "$(starship init bash)"
+
+
 
