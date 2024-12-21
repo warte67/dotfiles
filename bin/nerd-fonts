@@ -11,6 +11,7 @@ declare -a fonts=(
     FiraMono
     Go-Mono
     Hack
+    Noto
     Hermit
     JetBrainsMono
     Meslo
