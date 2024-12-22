@@ -1,33 +1,76 @@
 # ~/.bashrc: Customized Bash Configuration File
-
-# 1. Check if not running interactively, exit
+#
+#         $$\                           $$\
+#         $$ |                          $$ |
+#         $$$$$$$\   $$$$$$\   $$$$$$$\ $$$$$$$\   $$$$$$\   $$$$$$$\
+#         $$  __$$\  \____$$\ $$  _____|$$  __$$\ $$  __$$\ $$  _____|
+#         $$ |  $$ | $$$$$$$ |\$$$$$$\  $$ |  $$ |$$ |  \__|$$ /
+#         $$ |  $$ |$$  __$$ | \____$$\ $$ |  $$ |$$ |      $$ |
+#     $$\ $$$$$$$  |\$$$$$$$ |$$$$$$$  |$$ |  $$ |$$ |      \$$$$$$$\
+#     \__|\_______/  \_______|\_______/ \__|  \__|\__|       \_______|
+#
+#
+#
+#  Check if not running interactively, exit
 [ -z "$PS1" ] && return
 
-# 2. History Settings
+
+#   _    _ _     _                      _____      _   _   _
+#  | |  | (_)   | |                    / ____|    | | | | (_)
+#  | |__| |_ ___| |_ ___  _ __ _   _  | (___   ___| |_| |_ _ _ __   __ _ ___
+#  |  __  | / __| __/ _ \| '__| | | |  \___ \ / _ \ __| __| | '_ \ / _` / __|
+#  | |  | | \__ \ || (_) | |  | |_| |  ____) |  __/ |_| |_| | | | | (_| \__ \
+#  |_|  |_|_|___/\__\___/|_|   \__, | |_____/ \___|\__|\__|_|_| |_|\__, |___/
+#                               __/ |                               __/ |
+#                              |___/                               |___/
+#  History Settings
+#
 HISTSIZE=10000
 HISTFILESIZE=20000
-HISTCONTROL=ignoredups:erasedups  # No duplicate entries
+HISTCONTROL=ignoredups:erasedups        # No duplicate entries
 HISTIGNORE="ls:cd:cd -:pwd:exit:clear"  # Ignore common commands
-shopt -s histappend               # Append to history, don't overwrite
+shopt -s histappend                     # Append to history, don't overwrite
 
-# 3. Alias Definitions
+
+#            _ _             _____        __ _       _ _   _
+#      /\   | (_)           |  __ \      / _(_)     (_) | (_)
+#     /  \  | |_  __ _ ___  | |  | | ___| |_ _ _ __  _| |_ _  ___  _ __  ___
+#    / /\ \ | | |/ _` / __| | |  | |/ _ \  _| | '_ \| | __| |/ _ \| '_ \/ __|
+#   / ____ \| | | (_| \__ \ | |__| |  __/ | | | | | | | |_| | (_) | | | \__ \
+#  /_/    \_\_|_|\__,_|___/ |_____/ \___|_| |_|_| |_|_|\__|_|\___/|_| |_|___/
+#
+#  Alias Definitions
+#
 alias ll='ls -alF --color=auto'
 alias la='ls -A --color=auto'
 alias l='ls -CF --color=auto'
 alias gs='git status'
 alias gf='git fetch'
 alias gp='git pull'
-#alias update='sudo pacman -Syu'
-#alias upgrade='sudo pacman -Syu --noconfirm'
 alias c='clear'
-alias v='kate'  # Replace with your preferred editor
+alias v='kate'  # Override in .bash_aliases
 alias ..='cd ..'
 alias ...='cd ../..'
+# Source User-Specific Aliases
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
 
-# 4. Prompt Customization
+
+#   _____        __            _ _     _____                           _
+#  |  __ \      / _|          | | |   |  __ \                         | |
+#  | |  | | ___| |_ __ _ _   _| | |_  | |__) | __ ___  _ __ ___  _ __ | |_
+#  | |  | |/ _ \  _/ _` | | | | | __| |  ___/ '__/ _ \| '_ ` _ \| '_ \| __|
+#  | |__| |  __/ || (_| | |_| | | |_  | |   | | | (_) | | | | | | |_) | |_
+#  |_____/ \___|_| \__,_|\__,_|_|\__| |_|   |_|  \___/|_| |_| |_| .__/ \__|
+#                                                               | |
+#                                                               |_|
+#  Default Prompt Customization
+#
 PS1='\[\033[1;34m\]\u@\h\[\033[0m\]:\[\033[1;32m\]\w\[\033[0m\]$ '
 
-# 5. Color Support for `ls` and Other Commands
+
+# Color Support for `ls` and Other Commands
 if [ -x /usr/bin/dircolors ]; then
     eval "$(dircolors -b)"
     alias ls='ls --color=auto'
@@ -36,17 +79,42 @@ if [ -x /usr/bin/dircolors ]; then
     alias egrep='egrep --color=auto'
 fi
 
-# 6. Path Enhancements
+
+#   _____      _   _       ______       _                                               _
+#  |  __ \    | | | |     |  ____|     | |                                             | |
+#  | |__) |_ _| |_| |__   | |__   _ __ | |__   __ _ _ __   ___ ___ _ __ ___   ___ _ __ | |_
+#  |  ___/ _` | __| '_ \  |  __| | '_ \| '_ \ / _` | '_ \ / __/ _ \ '_ ` _ \ / _ \ '_ \| __|
+#  | |  | (_| | |_| | | | | |____| | | | | | | (_| | | | | (_|  __/ | | | | |  __/ | | | |_
+#  |_|   \__,_|\__|_| |_| |______|_| |_|_| |_|\__,_|_| |_|\___\___|_| |_| |_|\___|_| |_|\__|
+#
+#  Path Enhancement
+#
 # Ensure ~/.local/bin exists and is added to PATH if not already present
 if [ -d "$HOME/.local/bin" ] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
     export PATH="$HOME/.local/bin:$PATH"
 fi
+# Custom PS1 with Git Support (if `git` is installed)
+if command -v git > /dev/null 2>&1; then
+    git_branch() {
+        branch=$(git branch 2>/dev/null | grep '^*' | colrm 1 2)
+        [ -n "$branch" ] && echo " ($branch)"
+    }
+    PS1='\[\033[1;34m\]\u@\h\[\033[0m\]:\[\033[1;32m\]\w\[\033[0;33m\]$(git_branch)\[\033[0m\]$ '
+fi
 
-# 7. Convenient Functions
+
+#    _____                 _            _            _     ______                _   _
+#   / ____|               (_)          (_)          | |   |  ____|              | | (_)
+#  | |     ___  _ ____   ___  ___ _ __  _  ___ _ __ | |_  | |__ _   _ _ __   ___| |_ _  ___  _ __  ___
+#  | |    / _ \| '_ \ \ / / |/ _ \ '_ \| |/ _ \ '_ \| __| |  __| | | | '_ \ / __| __| |/ _ \| '_ \/ __|
+#  | |___| (_) | | | \ V /| |  __/ | | | |  __/ | | | |_  | |  | |_| | | | | (__| |_| | (_) | | | \__ \
+#   \_____\___/|_| |_|\_/ |_|\___|_| |_|_|\___|_| |_|\__| |_|   \__,_|_| |_|\___|\__|_|\___/|_| |_|___/
+#
+#  Convenient Functions
+#
 mkcd() {
     mkdir -p "$1" && cd "$1"
 }
-
 extract() {
     if [ -f "$1" ]; then
         case "$1" in
@@ -69,33 +137,23 @@ extract() {
     fi
 }
 
-# 8. Enable Autojump (if installed)
-if command -v autojump > /dev/null 2>&1; then
-    . /usr/share/autojump/autojump.sh
-fi
 
-# 9. Custom PS1 with Git Support (if `git` is installed)
-if command -v git > /dev/null 2>&1; then
-    git_branch() {
-        branch=$(git branch 2>/dev/null | grep '^*' | colrm 1 2)
-        [ -n "$branch" ] && echo " ($branch)"
-    }
-    PS1='\[\033[1;34m\]\u@\h\[\033[0m\]:\[\033[1;32m\]\w\[\033[0;33m\]$(git_branch)\[\033[0m\]$ '
-fi
-
-# 10. Source User-Specific Aliases
-if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
-fi
-
-# 11. Performance Tweaks
+#   _____           __                                            _______                 _
+#  |  __ \         / _|                                          |__   __|               | |
+#  | |__) |__ _ __| |_ ___  _ __ _ __ ___   __ _ _ __   ___ ___     | |_      _____  __ _| | _____
+#  |  ___/ _ \ '__|  _/ _ \| '__| '_ ` _ \ / _` | '_ \ / __/ _ \    | \ \ /\ / / _ \/ _` | |/ / __|
+#  | |  |  __/ |  | || (_) | |  | | | | | | (_| | | | | (_|  __/    | |\ V  V /  __/ (_| |   <\__ \
+#  |_|   \___|_|  |_| \___/|_|  |_| |_| |_|\__,_|_| |_|\___\___|    |_| \_/\_/ \___|\__,_|_|\_\___/
+#
+#  Performance Tweaks
+#
 export EDITOR="nano"  # Replace with your preferred editor
 export PAGER="less"
 export LESS="-R"
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
+if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+    export BUN_INSTALL="$HOME/.bun"
+    export PATH="$BUN_INSTALL/bin:$PATH"
+fi
 
 
 ##################################################################################
@@ -110,26 +168,27 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 #   blue, green, red, violet, brown, teal, purple, olive, gray, or default       #
 #                                                                                #
 ##################################################################################
-STARSHIP_TOML="$HOME/.config/starship.toml"
-if [[ "$(hostname)" == "coffee-table" ]]; then
-    sed -i 's/^palette = .*/palette = "blue"/' $STARSHIP_TOML
+if command -v starship > /dev/null 2>&1; then
+    STARSHIP_TOML="$HOME/.config/starship.toml"
+    if [[ "$(hostname)" == "coffee-table" ]]; then
+        sed -i 's/^palette = .*/palette = "blue"/' $STARSHIP_TOML
 
-elif [[ "$(hostname)" == "framework" ]]; then
-    sed -i 's/^palette = .*/palette = "teal"/' $STARSHIP_TOML
+    elif [[ "$(hostname)" == "framework" ]]; then
+        sed -i 's/^palette = .*/palette = "teal"/' $STARSHIP_TOML
 
-elif [[ "$(hostname)" == "tux" ]]; then
-    sed -i 's/^palette = .*/palette = "olive"/' $STARSHIP_TOML
+    elif [[ "$(hostname)" == "tux" ]]; then
+        sed -i 's/^palette = .*/palette = "olive"/' $STARSHIP_TOML
 
-elif [[ "$(hostname)" == "Mint22-vm" ]]; then
-    sed -i 's/^palette = .*/palette = "green"/' $STARSHIP_TOML
+    elif [[ "$(hostname)" == "Mint22-vm" ]]; then
+        sed -i 's/^palette = .*/palette = "green"/' $STARSHIP_TOML
 
-elif [[ "$(hostname)" == "debian" ]]; then
-    sed -i 's/^palette = .*/palette = "brown"/' $STARSHIP_TOML
+    elif [[ "$(hostname)" == "debian" ]]; then
+        sed -i 's/^palette = .*/palette = "brown"/' $STARSHIP_TOML
 
-else
-    sed -i 's/^palette = .*/palette = "gray"/' $STARSHIP_TOML
+    else
+        sed -i 's/^palette = .*/palette = "gray"/' $STARSHIP_TOML
+    fi
+    eval "$(starship init bash)"
 fi
-eval "$(starship init bash)"
-
 
 
