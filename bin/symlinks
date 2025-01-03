@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# List of symbolic links and their target paths
+declare -A symlinks=(
+    ["~/.config/starship.toml"]="~/Documents/GitHub/dotfiles/starship.toml"
+    ["~/.bashrc"]="~/Documents/GitHub/dotfiles/.bashrc"
+    ["~/.local/bin/update"]="~/Documents/GitHub/dotfiles/bin/update"
+    ["~/.local/bin/asm6809"]="~/Documents/GitHub/dotfiles/bin/asm6809"
+
+    # Add more symbolic links here as needed
+)
+
+# Function to create symbolic link if not exists
+create_symlink() {
+    local link="$1"
+    local target="$2"
+
+    # Expand '~' to full path for the home directory
+    link=$(eval echo "$link")
+    target=$(eval echo "$target")
+
+    # Check if the symbolic link exists
+    if [ ! -e "$link" ]; then
+        echo "Symbolic link $link not found. Creating..."
+        ln -s "$target" "$link" || { echo "Failed to create symbolic link $link. Exiting."; exit 1; }
+        echo "Symbolic link $link created successfully."
+    else
+        echo "Symbolic link $link already exists."
+    fi
+}
+
+# Ensure ~/.local/bin exists and is added to PATH if not already present
+if [ -d "$HOME/.local/bin" ] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+    export PATH="$HOME/.local/bin:$PATH"
+fi
+
+# Loop through the associative array of symlinks
+for link in "${!symlinks[@]}"; do
+    create_symlink "$link" "${symlinks[$link]}"
+done
+
+echo "All symbolic links checked and created if needed."
