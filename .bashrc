@@ -28,27 +28,50 @@ function work() {
     TARGET_DIR="$HOME/Documents/GitHub/retro_6809"
     REPO_URL="https://github.com/warte67/retro_6809"
 
-    # Check if the target directory exists
-    if [ ! -d "$TARGET_DIR" ]; then
-        echo "Target directory $TARGET_DIR does not exist. Creating it..."
-        mkdir -p "$TARGET_DIR" || { echo "Failed to create directory $TARGET_DIR. Exiting."; return 1; }
-
-        echo "Cloning repository into $TARGET_DIR..."
-        git clone "$REPO_URL" "$TARGET_DIR" || { echo "Failed to clone repository. Exiting."; return 1; }
-    fi
-
     # Check if the current directory is not the target directory
     if [ "$(pwd)" != "$(realpath "$TARGET_DIR")" ]; then
-        echo "Changing directory to $TARGET_DIR..."
-        cd "$TARGET_DIR" || { echo "Failed to change directory to $TARGET_DIR. Exiting."; return 1; }
+        echo "Current directory is not $TARGET_DIR. Changing directory..."
+        cd "$TARGET_DIR" || {
+            echo "Failed to change directory to $TARGET_DIR."
+            echo "Please Clone the REPO_URL from GitHub-Desktop."
+            echo "Exiting."; exit 1;
+        }
     else
         echo "Already in the target directory $TARGET_DIR."
     fi
 
     # Pull the latest changes from the repository
     echo "Pulling the latest changes from the repository..."
-    git pull || { echo "Failed to pull changes from the repository. Exiting."; return 1; }
+    git pull "$REPO_URL"
 }
+
+# function work() {
+#     # Define the target directory and repository URL
+#     TARGET_DIR="$HOME/Documents/GitHub/retro_6809"
+#     REPO_URL="https://github.com/warte67/retro_6809"
+#
+#     # Check if the target directory exists
+#     if [ ! -d "$TARGET_DIR" ]; then
+#         echo "Target directory $TARGET_DIR does not exist. Creating it..."
+#         mkdir -p "$TARGET_DIR" || { echo "Failed to create directory $TARGET_DIR. Exiting."; return 1; }
+#
+#         echo "Cloning repository into $TARGET_DIR..."
+#         git clone "$REPO_URL" "$TARGET_DIR" || { echo "Failed to clone repository. Exiting."; return 1; }
+#     fi
+#
+#     # Check if the current directory is not the target directory
+#     if [ "$(pwd)" != "$(realpath "$TARGET_DIR")" ]; then
+#         echo "Changing directory to $TARGET_DIR..."
+#         cd "$TARGET_DIR" || { echo "Failed to change directory to $TARGET_DIR. Exiting."; return 1; }
+#     else
+#         echo "Already in the target directory $TARGET_DIR."
+#     fi
+#
+#     # Pull the latest changes from the repository
+#     echo "Pulling the latest changes from the repository..."
+#     git pull || { echo "Failed to pull changes from the repository. Exiting."; return 1; }
+# }
+
 
 
 
