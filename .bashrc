@@ -25,10 +25,14 @@
 
 function work() {
     # Define the target directory and repository URL
-    TARGET_DIR="$HOME/Documents/GitHub/alpha_6809"
-    REPO_URL="https://github.com/warte67/alpha_6809"
-#     TARGET_DIR="$HOME/Documents/GitHub/retro_6809"
-#     REPO_URL="https://github.com/warte67/retro_6809"
+    TARGET_DIR="$HOME/Documents/GitHub/retro_6809"
+    REPO_URL="https://github.com/warte67/retro_6809"
+
+    # Check if Git is installed
+    if ! command -v git &> /dev/null; then
+        echo "Git is not installed. Please install Git and try again. Exiting."
+        return 1
+    fi
 
     # Check if the target directory exists
     if [ ! -d "$TARGET_DIR" ]; then
@@ -39,8 +43,8 @@ function work() {
         cd "$TARGET_DIR" || { echo "Failed to change directory to $TARGET_DIR. Exiting."; return 1; }
         git init
         git remote add origin "$REPO_URL"
-        git fetch
-        git git reset --hard origin/master
+        git fetch || { echo "Failed to fetch repository. Exiting."; return 1; }
+        git reset --hard origin/main || git reset --hard origin/master
     else
         echo "Target directory exists and is a valid Git repository."
         cd "$TARGET_DIR" || { echo "Failed to change directory to $TARGET_DIR. Exiting."; return 1; }
@@ -50,6 +54,7 @@ function work() {
     echo "Pulling the latest changes from the repository..."
     git pull || { echo "Failed to pull changes from the repository. Exiting."; return 1; }
 }
+
 
 
 # function work() {
