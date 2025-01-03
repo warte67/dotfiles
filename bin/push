@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Set the remote repository name (typically 'origin') and branch (e.g., 'main' or 'master')
+REMOTE="origin"
+BRANCH="master"
+
+# Ensure that git is installed
+if ! command -v git &> /dev/null; then
+    echo "Git is not installed. Please install Git first."
+    exit 1
+fi
+
+# Ensure we're inside a git repository
+if [ ! -d ".git" ]; then
+    echo "This is not a git repository. Please navigate to a git repository directory."
+    exit 1
+fi
+
+# Check for uncommitted changes
+git status --porcelain > /dev/null
+
+# If there are changes to commit, do the following:
+if [ $? -eq 0 ]; then
+    # Add all changes (staging all modified and new files)
+    echo "Staging changes..."
+    git add .
+
+    # Commit the changes
+    echo "Enter a commit message:"
+    read COMMIT_MSG
+    git commit -m "$COMMIT_MSG" || { echo "Commit failed. Exiting."; exit 1; }
+
+    echo "Changes committed."
+else
+    echo "No changes to commit."
+fi
+
+# Push the changes to the remote repository
+echo "Pushing changes to $REMOTE/$BRANCH..."
+git push "$REMOTE" "$BRANCH" || { echo "Push failed. Exiting."; exit 1; }
+
+echo "Changes pushed successfully to $REMOTE/$BRANCH."

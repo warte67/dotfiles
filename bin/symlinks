@@ -6,6 +6,8 @@ declare -A symlinks=(
     ["~/.bashrc"]="~/Documents/GitHub/dotfiles/.bashrc"
     ["~/.local/bin/update"]="~/Documents/GitHub/dotfiles/bin/update"
     ["~/.local/bin/asm6809"]="~/Documents/GitHub/dotfiles/bin/asm6809"
+    ["~/.local/bin/push"]="~/Documents/GitHub/dotfiles/bin/push"
+
 
     # Add more symbolic links here as needed
 )
