@@ -91,9 +91,9 @@ if command -v snap &> /dev/null; then
   sudo snap refresh
   echo ""
 else
-  echo "${GREEN}<<<${BLUE}=== ${WHITE}SNAP IS NOT INSTALLED ${BLUE}===${GREEN}>>>${RESET}"
-  echo ""
-  echo "${YELLOW}Skipping 'sudo snap refresh'...${RESET}"
+#  echo "${GREEN}<<<${BLUE}=== ${WHITE}SNAP IS NOT INSTALLED ${BLUE}===${GREEN}>>>${RESET}"
+#  echo ""
+#  echo "${YELLOW}Skipping 'sudo snap refresh'...${RESET}"
   echo ""
 fi
 
