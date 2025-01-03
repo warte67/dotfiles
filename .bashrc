@@ -25,8 +25,8 @@
 
 function work() {
     # Define the target directory and repository URL
-    TARGET_DIR="$HOME/Documents/GitHub/alpha_6809"
-    REPO_URL="https://github.com/warte67/alpha_6809"
+    TARGET_DIR="$HOME/Documents/GitHub/retro_6809"
+    REPO_URL="https://github.com/warte67/retro_6809"
 
     # Check if Git is installed
     if ! command -v git &> /dev/null; then
