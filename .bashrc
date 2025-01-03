@@ -30,10 +30,23 @@ function work() {
 
     # Check if Git is installed
     if ! command -v git &> /dev/null; then
-        echo "Git is not installed. Please install Git and try again. Exiting."
-        return 1
-    fi
+        echo "Git is not installed. Trying to install it..."
 
+        # Check for the availability of package managers
+        if command -v pacman &> /dev/null; then
+            echo "Installing Git using pacman (Arch-based system)..."
+            sudo pacman -S --noconfirm git || { echo "Failed to install Git using pacman. Exiting."; return 1; }
+        elif command -v apt &> /dev/null; then
+            echo "Installing Git using apt (Debian/Ubuntu-based system)..."
+            sudo apt update && sudo apt install -y git || { echo "Failed to install Git using apt. Exiting."; return 1; }
+        elif command -v dnf &> /dev/null; then
+            echo "Installing Git using dnf (Fedora-based system)..."
+            sudo dnf install -y git || { echo "Failed to install Git using dnf. Exiting."; return 1; }
+        else
+            echo "No supported package manager found. Please install Git manually."
+            return 1
+        fi
+    fi
     # Check if the target directory exists
     if [ ! -d "$TARGET_DIR" ]; then
         echo "Target directory $TARGET_DIR does not exist. Cloning repository..."
@@ -52,7 +65,6 @@ function work() {
         echo "Target directory exists and is a valid Git repository."
         cd "$TARGET_DIR" || { echo "Failed to change directory to $TARGET_DIR. Exiting."; return 1; }
     fi
-
     # Pull the latest changes from the repository
     echo "Pulling the latest changes from the repository..."
     git pull || { echo "Failed to pull changes from the repository. Exiting."; return 1; }
