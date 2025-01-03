@@ -28,5 +28,5 @@ while true; do
     /bin/bash "$SCRIPT"
     
     # Wait for 60 seconds
-    sleep 60
+    sleep 300
 done
