@@ -25,8 +25,8 @@
 
 function work() {
     # Define the target directory and repository URL
-    TARGET_DIR="$HOME/Documents/GitHub/retro_6809"
-    REPO_URL="https://github.com/warte67/retro_6809"
+    TARGET_DIR="$HOME/Documents/GitHub/alpha_6809"
+    REPO_URL="https://github.com/warte67/alpha_6809"
 
     # Check if Git is installed
     if ! command -v git &> /dev/null; then
@@ -38,13 +38,16 @@ function work() {
     if [ ! -d "$TARGET_DIR" ]; then
         echo "Target directory $TARGET_DIR does not exist. Cloning repository..."
         git clone "$REPO_URL" "$TARGET_DIR" || { echo "Failed to clone repository. Exiting."; return 1; }
-    elif [ ! -d "$TARGET_DIR/.git" ]; then
+    fi
+
+    # Ensure the directory is a Git repository
+    if [ ! -d "$TARGET_DIR/.git" ]; then
         echo "Target directory exists but is not a Git repository. Initializing and linking to remote..."
         cd "$TARGET_DIR" || { echo "Failed to change directory to $TARGET_DIR. Exiting."; return 1; }
         git init
         git remote add origin "$REPO_URL"
         git fetch || { echo "Failed to fetch repository. Exiting."; return 1; }
-        git reset --hard origin/main || git reset --hard origin/master
+        git reset --hard origin/master || { echo "Failed to reset repository to origin/master. Exiting."; return 1; }
     else
         echo "Target directory exists and is a valid Git repository."
         cd "$TARGET_DIR" || { echo "Failed to change directory to $TARGET_DIR. Exiting."; return 1; }
