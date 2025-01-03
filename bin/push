@@ -2,7 +2,7 @@
 
 # Set the remote repository name (typically 'origin') and branch (e.g., 'main' or 'master')
 REMOTE="origin"
-BRANCH="master"
+BRANCH="main"
 
 # Ensure that git is installed
 if ! command -v git &> /dev/null; then
