@@ -55,14 +55,14 @@ function work() {
 
     # Ensure the directory is a Git repository
     if [ ! -d "$TARGET_DIR/.git" ]; then
-        echo "Target directory exists but is not a Git repository. Initializing and linking to remote..."
+        echo "Target directory ($TARGET_DIR) exists but is not a Git repository. Initializing and linking to remote..."
         cd "$TARGET_DIR" || { echo "Failed to change directory to $TARGET_DIR. Exiting."; return 1; }
         git init
         git remote add origin "$REPO_URL"
         git fetch || { echo "Failed to fetch repository. Exiting."; return 1; }
         git reset --hard origin/master || { echo "Failed to reset repository to origin/master. Exiting."; return 1; }
     else
-        echo "Target directory exists and is a valid Git repository."
+        echo "Target directory ($TARGET_DIR) exists and is a valid Git repository."
         cd "$TARGET_DIR" || { echo "Failed to change directory to $TARGET_DIR. Exiting."; return 1; }
     fi
     # Pull the latest changes from the repository
