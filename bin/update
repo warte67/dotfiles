@@ -89,7 +89,6 @@ if command -v snap &> /dev/null; then
   echo ""
   sudo snap refresh --list
   sudo snap refresh
-  echo ""
 else
 #  echo "${GREEN}<<<${BLUE}=== ${WHITE}SNAP IS NOT INSTALLED ${BLUE}===${GREEN}>>>${RESET}"
 #  echo ""
@@ -98,4 +97,4 @@ else
 fi
 
 # Continue with the rest of the script
-echo "Update Complete..."
+echo "${GREEN}Update Complete...${RESET}"
