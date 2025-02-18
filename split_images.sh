@@ -31,7 +31,8 @@ for input_image in "$raw_dir"/*.jpg; do
   magick "$working_dir/$base_filename-resized.jpg" -crop 1440x2560+0+0 "$left_output"
 
   # Crop middle section (3072x1728) from the resized image
-  magick "$working_dir/$base_filename-resized.jpg" -crop 3072x1728+1440+450 "$middle_output"
+  # magick "$working_dir/$base_filename-resized.jpg" -crop 3072x1728+1440+450 "$middle_output"
+  magick "$working_dir/$base_filename-resized.jpg" -crop 3072x1728+1440+325 "$middle_output"
 
   # Crop right section (2560x1440) from the resized image
   magick "$working_dir/$base_filename-resized.jpg" -crop 2560x1440+4512+720 "$right_output"

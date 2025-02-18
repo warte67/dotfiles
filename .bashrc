@@ -12,7 +12,7 @@
 #
 #
 #  Check if not running interactively, exit
-[ -z "$PS1" ] && return
+#[ -z "$PS1" ] && return
 
 
 #    ______                _   _
@@ -238,6 +238,10 @@ if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
     export BUN_INSTALL="$HOME/.bun"
     export PATH="$BUN_INSTALL/bin:$PATH"
 fi
+
+export GTK_THEME=Adwaita:dark
+export QT_STYLE_OVERRIDE=Dark
+
 
 
 ##################################################################################
