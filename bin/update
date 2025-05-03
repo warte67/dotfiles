@@ -18,6 +18,56 @@ RESET=$(tput sgr0)
 # ensure admin privileges
 sudo echo
 
+
+# Check for updates using checkupdates
+echo "Checking for available updates..."
+updates=$(checkupdates 2>/dev/null)
+
+# If no updates are found
+if [[ -z "$updates" ]]; then
+  echo "No updates available."
+  exit 0
+fi
+
+# If updates are found, display them
+echo "Updates available:"
+echo "$updates"
+
+
+##########
+# BACKUP #
+##########
+
+# Prompt the user
+read -p "Would you like to perform a backup before updating? (Y/n): " backup_choice
+backup_choice=${backup_choice:-Y}  # Default to "Y" if no input is given
+
+# Check user response
+if [[ "$backup_choice" =~ ^[Yy]$ ]]; then
+  # Code to perform the backup
+  echo "Backup option selected."
+
+  # Check if Timeshift is installed
+  if command -v timeshift &> /dev/null; then
+    echo "Creating a Timeshift backup..."
+    sudo timeshift --create --comments "Auto backup (update script)" --tags D
+    if [ $? -eq 0 ]; then
+      echo "Backup completed successfully."
+    else
+      echo "Backup failed. Please check Timeshift settings." >&2
+      exit 1
+    fi
+  else
+    echo "Timeshift not installed. Skipping backup."
+  fi
+else
+  echo "Skipping backup."
+fi
+
+# Proceed with the rest of the script
+echo "Proceeding with the update..."
+
+
 # apt is present?
 if command -v apt &> /dev/null; then
   # ensure the 32-bit stuff is good to go for steam
