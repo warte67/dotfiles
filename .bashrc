@@ -243,6 +243,13 @@ export GTK_THEME=Adwaita:dark
 export QT_STYLE_OVERRIDE=Dark
 
 
+export QT_QPA_PLATFORM=wayland
+export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+export XDG_CURRENT_DESKTOP=Hyprland
+export XDG_SESSION_TYPE=wayland
+export GDK_BACKEND=wayland,x11
+
+
 
 ##################################################################################
 #   ____  _                 _     _         ____                            _    #

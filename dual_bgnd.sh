@@ -20,9 +20,9 @@ magick "$WALLPAPER" -crop 1920x1080+0+0 "$LEFT_OUTPUT"
 magick "$WALLPAPER" -crop 1920x1080+1920+0 "$RIGHT_OUTPUT"
 
 # Set the left half on the left monitor
-swaybg -o HDMI-A-1 -i "$LEFT_OUTPUT" -m fill &
+swaybg -o DP-3 -i "$LEFT_OUTPUT" -m fill &
 
 # Set the right half on the right monitor
-swaybg -o HDMI-A-2 -i "$RIGHT_OUTPUT" -m fill &
+swaybg -o HDMI-A-1 -i "$RIGHT_OUTPUT" -m fill &
 
 echo "Wallpaper applied successfully!"
