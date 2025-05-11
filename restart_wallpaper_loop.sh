@@ -12,4 +12,4 @@ fi
 
 # Start a new instance of the wallpaper loop
 /bin/bash "$WALLPAPER_LOOP_SCRIPT" &
-notify-send "Success" "Wallpaper loop restarted."
+#notify-send "Success" "Wallpaper loop restarted."

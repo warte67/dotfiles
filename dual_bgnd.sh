@@ -52,5 +52,5 @@ if ! kill -0 $LEFT_PID 2>/dev/null || ! kill -0 $RIGHT_PID 2>/dev/null; then
   exit 1
 fi
 
-notify-send "Success" "Wallpaper applied successfully!"
+# notify-send "Success" "Wallpaper applied successfully!"
 exit 0
