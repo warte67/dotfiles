@@ -10,7 +10,7 @@ LOCK_FILE="/tmp/swaybg_rnd.lock"
 if [ -f "$LOCK_FILE" ]; then
     rm -f "$LOCK_FILE"
 
-    #pkill swaybg   #pkilling swaybg causes a brief black between swaps
+    pkill swaybg   #pkilling swaybg causes a brief black between swaps
 
     #sleep 1  # Brief pause to ensure the previous loop terminates
     #notify-send "Success" "Background Changed."

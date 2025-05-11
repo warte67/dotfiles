@@ -24,6 +24,7 @@ fi
 while true; do
     # Exit if lock file is missing (manual termination)
     if [ ! -f "$LOCK_FILE" ]; then
+        # pkill swaybg
         exit 0
     fi
 
@@ -33,6 +34,7 @@ while true; do
     # Wait for 300 seconds (5 minutes) with frequent checks for the lock file
     for (( i = 0; i < 300; i++ )); do
         if [ ! -f "$LOCK_FILE" ]; then
+            # pkill swaybg
             exit 0
         fi
         sleep 1
