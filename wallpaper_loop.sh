@@ -24,13 +24,19 @@ fi
 while true; do
     # Exit if lock file is missing (manual termination)
     if [ ! -f "$LOCK_FILE" ]; then
-        pkill swaybg
         exit 0
     fi
 
     # Execute the dual_bgnd.sh script
     /bin/bash "$SCRIPT"
 
-    # Wait for 300 seconds (5 minutes)
-    sleep 300
+    # Wait for 300 seconds (5 minutes) with frequent checks for the lock file
+    for (( i = 0; i < 300; i++ )); do
+        if [ ! -f "$LOCK_FILE" ]; then
+            exit 0
+        fi
+        sleep 1
+    done
 done
+
+
