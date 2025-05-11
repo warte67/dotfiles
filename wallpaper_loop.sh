@@ -24,6 +24,7 @@ fi
 while true; do
     # Exit if lock file is missing (manual termination)
     if [ ! -f "$LOCK_FILE" ]; then
+        pkill swaybg
         exit 0
     fi
 
