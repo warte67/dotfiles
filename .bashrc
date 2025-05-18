@@ -249,6 +249,9 @@ export XDG_CURRENT_DESKTOP=Hyprland
 export XDG_SESSION_TYPE=wayland
 export GDK_BACKEND=wayland,x11
 
+# export PROTON_ENABLE_WAYLAND=1
+
+
 
 
 ##################################################################################
