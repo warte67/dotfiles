@@ -266,6 +266,22 @@ export GDK_BACKEND=wayland,x11
 #   blue, green, red, violet, brown, teal, purple, olive, gray, or default       #
 #                                                                                #
 ##################################################################################
+
+# Check if 'hostname' command exists, if not try to install it
+if ! command -v hostname &> /dev/null; then
+    echo "'hostname' command not found. Attempting to install..."
+
+    if command -v pacman &> /dev/null; then
+        sudo pacman -Sy --noconfirm inetutils
+    elif command -v apt &> /dev/null; then
+        sudo apt update && sudo apt install -y inetutils-hostname
+    elif command -v dnf &> /dev/null; then
+        sudo dnf install -y inetutils
+    else
+        echo "No supported package manager found. Please install 'hostname' manually."
+    fi
+fi
+
 if command -v starship > /dev/null 2>&1; then
     STARSHIP_TOML="$HOME/.config/starship.toml"
     if [[ "$(hostname)" == "coffee-table" ]]; then
