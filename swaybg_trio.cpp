@@ -7,17 +7,23 @@
 namespace fs = std::filesystem;
 
 // Constants
+
+// Monitor Definitions
+#define LEFT_MONITOR "HDMI-A-1"
+#define MIDDLE_MONITOR "DP-2"
+#define RIGHT_MONITOR "DP-1"
+
 const int LEFT_WIDTH = 1440;
 const int LEFT_HEIGHT = 2560;
 const int MIDDLE_BASE_WIDTH = 3840;
 const int MIDDLE_BASE_HEIGHT = 2160;
-const float DPI_SCALING_FACTOR = 0.8125; //0.847;
+const float DPI_SCALING_FACTOR = 0.8; // 1/1.25
 const int RIGHT_WIDTH = 2560;
 const int RIGHT_HEIGHT = 1440;
 const int HEIGHT = LEFT_HEIGHT;  // Consistent height for all monitors
 const int TOTAL_WIDTH = LEFT_WIDTH + (MIDDLE_BASE_WIDTH * DPI_SCALING_FACTOR) + RIGHT_WIDTH; // Total width of the reference image
 
-const int MIDDLE_Y_OFFSET = 50;
+const int MIDDLE_Y_OFFSET = 40;
 
 // Function to get a random file from a directory
 std::string get_random_file(const std::string& dir) {
@@ -86,10 +92,15 @@ int main() {
     std::string cleanup_command = "rm \"" + working_dir + "/" + base_filename + "-resized.jpg\"";
     std::system(cleanup_command.c_str());
 
-    // Set wallpapers using swaybg (assuming swaybg is installed)
-    std::string set_left_wallpaper = "swaybg -o HDMI-A-1 -i \"" + left_output + "\" -m fill &";
-    std::string set_middle_wallpaper = "swaybg -o DP-1 -i \"" + middle_output + "\" -m fill &";
-    std::string set_right_wallpaper = "swaybg -o DP-2 -i \"" + right_output + "\" -m fill &";
+    // // Set wallpapers using swaybg (assuming swaybg is installed)
+    // std::string set_left_wallpaper = "swaybg -o HDMI-A-1 -i \"" + left_output + "\" -m fill &";
+    // std::string set_middle_wallpaper = "swaybg -o DP-2 -i \"" + middle_output + "\" -m fill &";
+    // std::string set_right_wallpaper = "swaybg -o DP-1 -i \"" + right_output + "\" -m fill &";
+
+    // Set wallpapers using swaybg
+    std::string set_left_wallpaper = "swaybg -o " + std::string(LEFT_MONITOR) + " -i \"" + left_output + "\" -m fill &";
+    std::string set_middle_wallpaper = "swaybg -o " + std::string(MIDDLE_MONITOR) + " -i \"" + middle_output + "\" -m fill &";
+    std::string set_right_wallpaper = "swaybg -o " + std::string(RIGHT_MONITOR) + " -i \"" + right_output + "\" -m fill &";
 
     std::system(set_left_wallpaper.c_str());
     std::system(set_middle_wallpaper.c_str());

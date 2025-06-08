@@ -232,6 +232,7 @@ extract() {
 #  Performance Tweaks
 #
 export EDITOR="nano"  # Replace with your preferred editor
+export TERMINAL="konsole"
 export PAGER="less"
 export LESS="-R"
 if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
@@ -250,7 +251,6 @@ export XDG_SESSION_TYPE=wayland
 export GDK_BACKEND=wayland,x11
 
 # export PROTON_ENABLE_WAYLAND=1
-
 
 
 
