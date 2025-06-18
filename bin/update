@@ -7,6 +7,7 @@ YELLOW=$(tput setaf 3)
 BLUE=$(tput setaf 4)
 WHITE=$(tput setaf 7)
 RESET=$(tput sgr0)
+BOLD=$(tput bold)
 
 # Ensure admin privileges
 if ! sudo -v; then
@@ -70,7 +71,7 @@ update_system() {
     if ! sudo pacman -Syu --noconfirm; then
       echo "${YELLOW}Update failed. Attempting to rank mirrors...${RESET}"
       rank_mirrors
-      read -p "Would you like to retry the update? (Y/n): " retry_choice
+      read -p "${BOLD}${WHITE}Would you like to retry the update? (Y/n): " retry_choice
       retry_choice=${retry_choice:-Y}  # Default to "Y" if no input is given
       if [[ "$retry_choice" =~ ^[Yy]$ ]]; then
         echo "${GREEN}Retrying update...${RESET}"
@@ -112,7 +113,7 @@ update_system() {
 check_updates
 
 # Ask user about backup
-read -p "Would you like to perform a backup based on these updates? (Y/n): " backup_choice
+read -p "${BOLD}${WHITE}Would you like to perform a backup based on these updates? (Y/n): " backup_choice
 backup_choice=${backup_choice:-Y}
 
 if [[ "$backup_choice" =~ ^[Yy]$ ]]; then
