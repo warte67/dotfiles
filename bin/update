@@ -1,150 +1,279 @@
 #!/bin/bash
 
-# Set Colors
+# Set colors
 RED=$(tput setaf 1)
 GREEN=$(tput setaf 2)
 YELLOW=$(tput setaf 3)
 BLUE=$(tput setaf 4)
-MAGENTA=$(tput setaf 5)
-CYAN=$(tput setaf 6)
 WHITE=$(tput setaf 7)
 RESET=$(tput sgr0)
 
-# Print colored output
-# echo "${RED}Error:${RESET} Something went wrong."
-# echo "${GREEN}Success:${RESET} Operation completed successfully."
-# echo "${YELLOW}Warning:${RESET} Proceed with caution."
-
-# ensure admin privileges
-sudo echo
-
-
-# Check for updates using checkupdates
-echo "Checking for available updates..."
-updates=$(checkupdates 2>/dev/null)
-
-# If no updates are found
-if [[ -z "$updates" ]]; then
-  echo "No updates available."
-  exit 0
+# Ensure admin privileges
+if ! sudo -v; then
+  echo "${RED}Error: ${WHITE}Admin privileges required. Exiting.${RESET}"
+  exit 1
 fi
 
-# If updates are found, display them
-echo "Updates available:"
-echo "$updates"
-
-
-##########
-# BACKUP #
-##########
-
-# Prompt the user
-read -p "Would you like to perform a backup before updating? (Y/n): " backup_choice
-backup_choice=${backup_choice:-Y}  # Default to "Y" if no input is given
-
-# Check user response
-if [[ "$backup_choice" =~ ^[Yy]$ ]]; then
-  # Code to perform the backup
-  echo "Backup option selected."
-
-  # Check if Timeshift is installed
-  if command -v timeshift &> /dev/null; then
-    echo "Creating a Timeshift backup..."
-    sudo timeshift --create --comments "Auto backup (update script)" --tags D
-    if [ $? -eq 0 ]; then
-      echo "Backup completed successfully."
-    else
-      echo "Backup failed. Please check Timeshift settings." >&2
-      exit 1
-    fi
+# Function to rank mirrors
+rank_mirrors() {
+  if command -v reflector &> /dev/null; then
+    echo "${GREEN}<<< ${BLUE}Ranking Mirrors... ${GREEN}>>>${RESET}"
+    sudo reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist
   else
-    echo "Timeshift not installed. Skipping backup."
+    echo "${YELLOW}Reflector not installed. Skipping mirror ranking.${RESET}"
   fi
-else
-  echo "Skipping backup."
-fi
+}
 
-# Proceed with the rest of the script
-echo "Proceeding with the update..."
+# Function to check updates
+check_updates() {
+  echo "${GREEN}<<< ${BLUE}Checking for available updates... ${GREEN}>>>${RESET}"
 
-
-# apt is present?
-if command -v apt &> /dev/null; then
-  # ensure the 32-bit stuff is good to go for steam
-  sudo dpkg --add-architecture i386
-
-  echo "${GREEN}<<<${BLUE}===== ${WHITE}UPDATING APTS${BLUE}=====${GREEN}>>>${RESET}"
-  echo ""
-  echo "${YELLOW}sudo apt update${RESET}"
-  echo ""
-  sudo apt update
-  echo ""  
-  echo "${GREEN}<<<${BLUE}===== ${WHITE}UPGRADING APTS${BLUE}=====${GREEN}>>>${RESET}"
-  echo ""
-  echo "${YELLOW}sudo apt upgrade -y${RESET}"
-  echo ""
-  sudo apt upgrade -y
-  echo ""
-fi
-
-# pacman is present
-if command -v pacman &> /dev/null; then
-  echo "${GREEN}<<<${BLUE}===== ${WHITE} UPDATING PACMAN${BLUE} =====${GREEN}>>>$RESET"
-  echo ""
-  echo "${YELLOW}sudo pacman -Syu ${RESET}"
-  echo ""
-  sudo pacman -Syu
-  echo ""
-fi
-
-# yay is present
-if command -v yay &> /dev/null; then
-  echo "${GREEN}<<<${BLUE}===== ${WHITE}UPDATING YAY${BLUE}=====${GREEN}>>>${RESET}"
-  echo ""
-  echo "${YELLOW} yay -Syu ${RESET}"
-  echo ""
-  yay -Syu
-  echo ""
-elif command -v paru &> /dev/null; then
-  echo "${GREEN}<<<${BLUE}===== ${WHITE}UPDATING PARU${BLUE}=====${GREEN}>>>${RESET}"
-  echo ""
-  echo "${YELLOW}paru -Syu ${RESET}"
-  echo ""
-  paru -Syu
-  echo ""
-fi
-
-# flatpak is installed?
-if command -v flatpak &> /dev/null; then
-  #sudo flatpak update -y
-  echo "${GREEN}<<${BLUE}== ${WHITE}UPDATING FLATPAKS ${BLUE}==${GREEN}>>${RESET}"
-  echo ""
-  echo "${YELLOW}sudo flatpak update -y${RESET}"
-  echo ""
-  sudo flatpak update -y
-  if command -v apt &> /dev/null; then
-    sudo apt autoremove
+  if command -v checkupdates &> /dev/null; then
+    # For Arch-based systems
+    updates=$(checkupdates 2>/dev/null)
+    package_manager="pacman"
+  elif command -v apt &> /dev/null; then
+    # For Ubuntu-based systems
+    updates=$(apt list --upgradable 2>/dev/null | grep -v "Listing...")
+    package_manager="apt"
+  else
+    echo "${RED}Error: ${WHITE}No supported package manager found.${RESET}"
+    exit 1
   fi
-  echo ""
+
+  if [[ -z "$updates" ]]; then
+    echo "No updates available."
+    exit 0
+  fi
+
+  echo "Updates available:"
+  echo "$updates"
+}
+
+# Function to perform a backup
+perform_backup() {
+  if command -v timeshift &> /dev/null; then
+    echo "${GREEN}Creating Timeshift backup...${RESET}"
+    sudo timeshift --create --comments "Auto backup (update script)" --tags D || {
+      echo "${RED}Backup failed. Check Timeshift settings.${RESET}"
+      exit 1
+    }
+  else
+    echo "${YELLOW}Timeshift not installed. Skipping backup.${RESET}"
+  fi
+}
+
+# Function to update the system
+update_system() {
+  if [[ "$package_manager" == "pacman" ]]; then
+    echo "${GREEN}<<< ${BLUE}Updating Pacman... ${GREEN}>>>${RESET}"
+    if ! sudo pacman -Syu --noconfirm; then
+      echo "${YELLOW}Update failed. Attempting to rank mirrors...${RESET}"
+      rank_mirrors
+      read -p "Would you like to retry the update? (Y/n): " retry_choice
+      retry_choice=${retry_choice:-Y}  # Default to "Y" if no input is given
+      if [[ "$retry_choice" =~ ^[Yy]$ ]]; then
+        echo "${GREEN}Retrying update...${RESET}"
+        exec "$0" "$@"  # Restart the script with the same arguments
+      else
+        echo "${YELLOW}Update aborted by user.${RESET}"
+        exit 1
+      fi
+    fi
+
+    if command -v yay &> /dev/null; then
+      echo "${GREEN}<<< ${BLUE}Updating AUR (yay)... ${GREEN}>>>${RESET}"
+      yay -Syu --noconfirm
+    elif command -v paru &> /dev/null; then
+      echo "${GREEN}<<< ${BLUE}Updating AUR (paru)... ${GREEN}>>>${RESET}"
+      paru -Syu --noconfirm
+    fi
+  elif [[ "$package_manager" == "apt" ]]; then
+    echo "${GREEN}<<< ${BLUE}Updating APT Packages... ${GREEN}>>>${RESET}"
+    sudo dpkg --add-architecture i386
+    sudo apt update && sudo apt upgrade -y
+    sudo apt autoremove -y
+  fi
+
+  # Flatpak updates
+  if command -v flatpak &> /dev/null; then
+    echo "${GREEN}<<< ${BLUE}Updating Flatpaks... ${GREEN}>>>${RESET}"
+    sudo flatpak update -y
+  fi
+
+  # Snap updates
+  if command -v snap &> /dev/null; then
+    echo "${GREEN}<<< ${BLUE}Updating Snaps... ${GREEN}>>>${RESET}"
+    sudo snap refresh
+  fi
+}
+
+# Main script execution
+check_updates
+
+# Ask user about backup
+read -p "Would you like to perform a backup based on these updates? (Y/n): " backup_choice
+backup_choice=${backup_choice:-Y}
+
+if [[ "$backup_choice" =~ ^[Yy]$ ]]; then
+  perform_backup
 else
-  echo "${GREEN}<<<${BLUE}=== ${WHITE}FLATPAK IS NOT INSTALLED ${BLUE}===${GREEN}>>>${RESET}"
-  echo ""
-fi
-  
-#sudo snap refresh
-if command -v snap &> /dev/null; then
-  echo "${GREEN}<<<${BLUE}=== ${WHITE}UPDATING SNAPS ${BLUE}===${GREEN}>>>${RESET}"
-  echo ""
-  echo "${YELLOW}sudo snap refresh${RESET}"
-  echo ""
-  sudo snap refresh --list
-  sudo snap refresh
-else
-#  echo "${GREEN}<<<${BLUE}=== ${WHITE}SNAP IS NOT INSTALLED ${BLUE}===${GREEN}>>>${RESET}"
-#  echo ""
-#  echo "${YELLOW}Skipping 'sudo snap refresh'...${RESET}"
-  echo ""
+  echo "${YELLOW}Backup skipped by user.${RESET}"
 fi
 
-# Continue with the rest of the script
-echo "${GREEN}Update Complete...${RESET}"
+# Proceed with updates
+update_system
+
+echo "${GREEN}System update complete.${RESET}"
+
+
+# #!/bin/bash
+#
+# # Set Colors
+# RED=$(tput setaf 1)
+# GREEN=$(tput setaf 2)
+# YELLOW=$(tput setaf 3)
+# BLUE=$(tput setaf 4)
+# MAGENTA=$(tput setaf 5)
+# CYAN=$(tput setaf 6)
+# WHITE=$(tput setaf 7)
+# RESET=$(tput sgr0)
+#
+# # Print colored output
+# # echo "${RED}Error:${RESET} Something went wrong."
+# # echo "${GREEN}Success:${RESET} Operation completed successfully."
+# # echo "${YELLOW}Warning:${RESET} Proceed with caution."
+#
+# # ensure admin privileges
+# sudo echo
+#
+#
+# # Check for updates using checkupdates
+# echo "Checking for available updates..."
+# updates=$(checkupdates 2>/dev/null)
+#
+# # If no updates are found
+# if [[ -z "$updates" ]]; then
+#   echo "No updates available."
+#   exit 0
+# fi
+#
+# # If updates are found, display them
+# echo "Updates available:"
+# echo "$updates"
+#
+#
+# ##########
+# # BACKUP #
+# ##########
+#
+# # Prompt the user
+# read -p "Would you like to perform a backup before updating? (Y/n): " backup_choice
+# backup_choice=${backup_choice:-Y}  # Default to "Y" if no input is given
+#
+# # Check user response
+# if [[ "$backup_choice" =~ ^[Yy]$ ]]; then
+#   # Code to perform the backup
+#   echo "Backup option selected."
+#
+#   # Check if Timeshift is installed
+#   if command -v timeshift &> /dev/null; then
+#     echo "Creating a Timeshift backup..."
+#     sudo timeshift --create --comments "Auto backup (update script)" --tags D
+#     if [ $? -eq 0 ]; then
+#       echo "Backup completed successfully."
+#     else
+#       echo "Backup failed. Please check Timeshift settings." >&2
+#       exit 1
+#     fi
+#   else
+#     echo "Timeshift not installed. Skipping backup."
+#   fi
+# else
+#   echo "Skipping backup."
+# fi
+#
+# # Proceed with the rest of the script
+# echo "Proceeding with the update..."
+#
+#
+# # apt is present?
+# if command -v apt &> /dev/null; then
+#   # ensure the 32-bit stuff is good to go for steam
+#   sudo dpkg --add-architecture i386
+#
+#   echo "${GREEN}<<<${BLUE}===== ${WHITE}UPDATING APTS${BLUE}=====${GREEN}>>>${RESET}"
+#   echo ""
+#   echo "${YELLOW}sudo apt update${RESET}"
+#   echo ""
+#   sudo apt update
+#   echo ""
+#   echo "${GREEN}<<<${BLUE}===== ${WHITE}UPGRADING APTS${BLUE}=====${GREEN}>>>${RESET}"
+#   echo ""
+#   echo "${YELLOW}sudo apt upgrade -y${RESET}"
+#   echo ""
+#   sudo apt upgrade -y
+#   echo ""
+# fi
+#
+# # pacman is present
+# if command -v pacman &> /dev/null; then
+#   echo "${GREEN}<<<${BLUE}===== ${WHITE} UPDATING PACMAN${BLUE} =====${GREEN}>>>$RESET"
+#   echo ""
+#   echo "${YELLOW}sudo pacman -Syu ${RESET}"
+#   echo ""
+#   sudo pacman -Syu
+#   echo ""
+# fi
+#
+# # yay is present
+# if command -v yay &> /dev/null; then
+#   echo "${GREEN}<<<${BLUE}===== ${WHITE}UPDATING YAY${BLUE}=====${GREEN}>>>${RESET}"
+#   echo ""
+#   echo "${YELLOW} yay -Syu ${RESET}"
+#   echo ""
+#   yay -Syu
+#   echo ""
+# elif command -v paru &> /dev/null; then
+#   echo "${GREEN}<<<${BLUE}===== ${WHITE}UPDATING PARU${BLUE}=====${GREEN}>>>${RESET}"
+#   echo ""
+#   echo "${YELLOW}paru -Syu ${RESET}"
+#   echo ""
+#   paru -Syu
+#   echo ""
+# fi
+#
+# # flatpak is installed?
+# if command -v flatpak &> /dev/null; then
+#   #sudo flatpak update -y
+#   echo "${GREEN}<<${BLUE}== ${WHITE}UPDATING FLATPAKS ${BLUE}==${GREEN}>>${RESET}"
+#   echo ""
+#   echo "${YELLOW}sudo flatpak update -y${RESET}"
+#   echo ""
+#   sudo flatpak update -y
+#   if command -v apt &> /dev/null; then
+#     sudo apt autoremove
+#   fi
+#   echo ""
+# else
+#   echo "${GREEN}<<<${BLUE}=== ${WHITE}FLATPAK IS NOT INSTALLED ${BLUE}===${GREEN}>>>${RESET}"
+#   echo ""
+# fi
+#
+# #sudo snap refresh
+# if command -v snap &> /dev/null; then
+#   echo "${GREEN}<<<${BLUE}=== ${WHITE}UPDATING SNAPS ${BLUE}===${GREEN}>>>${RESET}"
+#   echo ""
+#   echo "${YELLOW}sudo snap refresh${RESET}"
+#   echo ""
+#   sudo snap refresh --list
+#   sudo snap refresh
+# else
+# #  echo "${GREEN}<<<${BLUE}=== ${WHITE}SNAP IS NOT INSTALLED ${BLUE}===${GREEN}>>>${RESET}"
+# #  echo ""
+# #  echo "${YELLOW}Skipping 'sudo snap refresh'...${RESET}"
+#   echo ""
+# fi
+#
+# # Continue with the rest of the script
+# echo "${GREEN}Update Complete...${RESET}"
