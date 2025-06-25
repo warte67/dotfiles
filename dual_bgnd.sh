@@ -12,7 +12,7 @@ RIGHT_OUTPUT="/tmp/right_wallpaper.jpg"
 
 # Monitor identifiers (adjust as per your setup)
 LEFT_MONITOR="DP-3"
-RIGHT_MONITOR="HDMI-A-1"
+RIGHT_MONITOR="eDP-1"
 
 # Find a random .jpg file in the directory
 WALLPAPER=$(find "$WALLPAPER_DIR" -type f -name "*.jpg" | shuf -n 1)
