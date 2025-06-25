@@ -177,6 +177,13 @@ fi
 if [ -d "$HOME/.local/bin" ] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
     export PATH="$HOME/.local/bin:$PATH"
 fi
+
+# Add /opt/clion/bin if the folder exists and not already in the PATH
+if [ -d "/opt/clion/bin" ] && [[ ":$PATH:" != *":/opt/clion/bin:"* ]]; then
+    export PATH="/opt/clion/bin:$PATH"
+fi
+
+
 # Custom PS1 with Git Support (if `git` is installed)
 if command -v git > /dev/null 2>&1; then
     git_branch() {
@@ -232,6 +239,7 @@ extract() {
 #  Performance Tweaks
 #
 export EDITOR="nano"  # Replace with your preferred editor
+export TERMINAL="konsole"
 export PAGER="less"
 export LESS="-R"
 if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
@@ -253,7 +261,6 @@ export GDK_BACKEND=wayland,x11
 
 
 
-
 ##################################################################################
 #   ____  _                 _     _         ____                            _    #
 #  / ___|| |_ __ _ _ __ ___| |__ (_)_ __   |  _ \ _ __ ___  _ __ ___  _ __ | |_  #
@@ -266,6 +273,22 @@ export GDK_BACKEND=wayland,x11
 #   blue, green, red, violet, brown, teal, purple, olive, gray, or default       #
 #                                                                                #
 ##################################################################################
+
+# Check if 'hostname' command exists, if not try to install it
+if ! command -v hostname &> /dev/null; then
+    echo "'hostname' command not found. Attempting to install..."
+
+    if command -v pacman &> /dev/null; then
+        sudo pacman -Sy --noconfirm inetutils
+    elif command -v apt &> /dev/null; then
+        sudo apt update && sudo apt install -y inetutils-hostname
+    elif command -v dnf &> /dev/null; then
+        sudo dnf install -y inetutils
+    else
+        echo "No supported package manager found. Please install 'hostname' manually."
+    fi
+fi
+
 if command -v starship > /dev/null 2>&1; then
     STARSHIP_TOML="$HOME/.config/starship.toml"
     if [[ "$(hostname)" == "coffee-table" ]]; then
