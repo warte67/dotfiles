@@ -306,6 +306,9 @@ if command -v starship > /dev/null 2>&1; then
     elif [[ "$(hostname)" == "debian" ]]; then
         sed -i 's/^palette = .*/palette = "brown"/' $STARSHIP_TOML
 
+    elif [[ "$(hostname)" == "bazzite" ]]; then
+        sed -i 's/^palette = .*/palette = "purple"/' $STARSHIP_TOML
+
     else
         sed -i 's/^palette = .*/palette = "gray"/' $STARSHIP_TOML
     fi
