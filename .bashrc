@@ -132,9 +132,10 @@ alias gs='git status'
 alias gf='git fetch'
 alias gp='git pull'
 alias c='clear'
-alias v='kate'  # Override in .bash_aliases
+alias v='kate'  # Override in .bash_aliases./install.sh -b ~/.local/bin
 alias ..='cd ..'
 alias ...='cd ../..'
+alias edit='cosmic-edit'
 # Source User-Specific Aliases
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
@@ -310,7 +311,7 @@ if command -v starship > /dev/null 2>&1; then
         sed -i 's/^palette = .*/palette = "purple"/' $STARSHIP_TOML
 
     else
-        sed -i 's/^palette = .*/palette = "gray"/' $STARSHIP_TOML
+        sed -i 's/^palette = .*/palette = "green"/' $STARSHIP_TOML
     fi
     eval "$(starship init bash)"
 fi
