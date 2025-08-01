@@ -135,7 +135,7 @@ alias c='clear'
 alias v='kate'  # Override in .bash_aliases./install.sh -b ~/.local/bin
 alias ..='cd ..'
 alias ...='cd ../..'
-alias edit='cosmic-edit'
+alias edit='gnome-text-editor'
 # Source User-Specific Aliases
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
@@ -302,10 +302,10 @@ if command -v starship > /dev/null 2>&1; then
         sed -i 's/^palette = .*/palette = "olive"/' $STARSHIP_TOML
 
     elif [[ "$(hostname)" == "Mint22-vm" ]]; then
-        sed -i 's/^palette = .*/palette = "green"/' $STARSHIP_TOML
+        sed -i 's/^palette = .*/palette = "brown"/' $STARSHIP_TOML
 
     elif [[ "$(hostname)" == "debian" ]]; then
-        sed -i 's/^palette = .*/palette = "brown"/' $STARSHIP_TOML
+        sed -i 's/^palette = .*/palette = "olive"/' $STARSHIP_TOML
 
     elif [[ "$(hostname)" == "bazzite" ]]; then
         sed -i 's/^palette = .*/palette = "purple"/' $STARSHIP_TOML
