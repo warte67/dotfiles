@@ -125,7 +125,9 @@ shopt -s histappend                     # Append to history, don't overwrite
 #
 #  Alias Definitions
 #
-alias ll='ls -alF --color=auto'
+#alias ll='ls -alF --color=auto'
+alias ll='eza -al'
+alias l='eza -;'
 alias la='ls -A --color=auto'
 alias l='ls -CF --color=auto'
 alias gs='git status'
@@ -179,10 +181,10 @@ if [ -d "$HOME/.local/bin" ] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
     export PATH="$HOME/.local/bin:$PATH"
 fi
 
-# Add /opt/clion/bin if the folder exists and not already in the PATH
-if [ -d "/opt/clion/bin" ] && [[ ":$PATH:" != *":/opt/clion/bin:"* ]]; then
-    export PATH="/opt/clion/bin:$PATH"
+if [ -d "/usr/games" ] && [[ ":$PATH:" != *":/usr/games:"* ]]; then
+    export PATH="/usr/games:$PATH"
 fi
+
 
 
 # Custom PS1 with Git Support (if `git` is installed)
