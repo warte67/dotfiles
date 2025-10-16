@@ -125,16 +125,19 @@ shopt -s histappend                     # Append to history, don't overwrite
 #
 #  Alias Definitions
 #
-alias ll='ls -alF --color=auto'
+#alias ll='ls -alF --color=auto'
+alias ll='eza -al'
+alias l='eza -;'
 alias la='ls -A --color=auto'
 alias l='ls -CF --color=auto'
 alias gs='git status'
 alias gf='git fetch'
 alias gp='git pull'
 alias c='clear'
-alias v='kate'  # Override in .bash_aliases
+alias v='kate'  # Override in .bash_aliases./install.sh -b ~/.local/bin
 alias ..='cd ..'
 alias ...='cd ../..'
+alias edit='gnome-text-editor'
 # Source User-Specific Aliases
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
@@ -178,10 +181,10 @@ if [ -d "$HOME/.local/bin" ] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
     export PATH="$HOME/.local/bin:$PATH"
 fi
 
-# Add /opt/clion/bin if the folder exists and not already in the PATH
-if [ -d "/opt/clion/bin" ] && [[ ":$PATH:" != *":/opt/clion/bin:"* ]]; then
-    export PATH="/opt/clion/bin:$PATH"
+if [ -d "/usr/games" ] && [[ ":$PATH:" != *":/usr/games:"* ]]; then
+    export PATH="/usr/games:$PATH"
 fi
+
 
 
 # Custom PS1 with Git Support (if `git` is installed)
@@ -301,13 +304,16 @@ if command -v starship > /dev/null 2>&1; then
         sed -i 's/^palette = .*/palette = "olive"/' $STARSHIP_TOML
 
     elif [[ "$(hostname)" == "Mint22-vm" ]]; then
-        sed -i 's/^palette = .*/palette = "green"/' $STARSHIP_TOML
-
-    elif [[ "$(hostname)" == "debian" ]]; then
         sed -i 's/^palette = .*/palette = "brown"/' $STARSHIP_TOML
 
+    elif [[ "$(hostname)" == "debian" ]]; then
+        sed -i 's/^palette = .*/palette = "olive"/' $STARSHIP_TOML
+
+    elif [[ "$(hostname)" == "bazzite" ]]; then
+        sed -i 's/^palette = .*/palette = "purple"/' $STARSHIP_TOML
+
     else
-        sed -i 's/^palette = .*/palette = "gray"/' $STARSHIP_TOML
+        sed -i 's/^palette = .*/palette = "green"/' $STARSHIP_TOML
     fi
     eval "$(starship init bash)"
 fi
