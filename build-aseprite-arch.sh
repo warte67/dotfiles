@@ -59,7 +59,6 @@ is_official_build=true
 is_debug=false
 skia_enable_tools=false
 skia_use_gl=true
-skia_enable_gpu=true
 skia_use_system_expat=false
 skia_use_system_icu=false
 skia_use_system_libjpeg_turbo=false
@@ -68,7 +67,8 @@ skia_use_system_libwebp=false
 skia_use_system_zlib=false
 skia_use_system_freetype2=false
 skia_use_system_harfbuzz=false
-extra_cflags=[\"-O2\"]
+extra_cflags=["-O2"]
+target_cpu="x86
 "
 
 echo "Building Skia..."
