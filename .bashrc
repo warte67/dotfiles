@@ -319,3 +319,5 @@ if command -v starship > /dev/null 2>&1; then
 fi
 
 
+export PATH="$HOME/depot_tools:$PATH"
+export PATH="$HOME/depot_tools:$PATH"

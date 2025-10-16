@@ -1,49 +1,59 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -e
+set -o pipefail
 
-# ---------------------------
-# Variables
-# ---------------------------
+# -------------------------------
+# CONFIGURATION
+# -------------------------------
 ASEPRITE_DIR="$HOME/aseprite"
 SKIA_DIR="$HOME/deps/skia"
 PYTHON_VERSION="3.12.12"
+BUILD_DIR="$ASEPRITE_DIR/build"
 NUM_CORES=$(nproc)
 
-# ---------------------------
-# 1. Install pyenv and Python 3.12
-# ---------------------------
-if ! command -v pyenv >/dev/null 2>&1; then
-    echo "Installing pyenv..."
-    curl https://pyenv.run | bash
-    export PATH="$HOME/.pyenv/bin:$PATH"
-    eval "$(pyenv init --path)"
-    eval "$(pyenv init -)"
-    eval "$(pyenv virtualenv-init -)"
+# -------------------------------
+# FUNCTIONS
+# -------------------------------
+info() { echo -e "\e[1;34m[INFO]\e[0m $*"; }
+warn() { echo -e "\e[1;33m[WARN]\e[0m $*"; }
+error() { echo -e "\e[1;31m[ERROR]\e[0m $*"; exit 1; }
+
+# -------------------------------
+# Install pyenv & Python
+# -------------------------------
+info "Installing pyenv and Python $PYTHON_VERSION..."
+
+if [ -d "$HOME/.pyenv" ]; then
+    warn "Existing pyenv detected. Removing..."
+    rm -rf "$HOME/.pyenv"
 fi
 
-# Ensure Python 3.12 is installed
-if ! pyenv versions | grep -q "$PYTHON_VERSION"; then
-    echo "Installing Python $PYTHON_VERSION..."
-    pyenv install -s "$PYTHON_VERSION"
-fi
+curl https://pyenv.run | bash
 
+export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init --path)"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+
+pyenv install -s "$PYTHON_VERSION"
 pyenv global "$PYTHON_VERSION"
-echo "Using Python: $(python --version)"
 
-# ---------------------------
-# 2. Build Skia
-# ---------------------------
-mkdir -p "$SKIA_DIR"
+info "Python version: $(python --version)"
+
+# -------------------------------
+# Build Skia
+# -------------------------------
+info "Building Skia..."
+
+mkdir -p "$SKIA_DIR/out/Release-x64"
 cd "$SKIA_DIR"
 
-# Fetch Skia dependencies and GN if missing
-if [ ! -f "$SKIA_DIR/bin/gn" ]; then
-    echo "Fetching Skia dependencies..."
+if [ ! -f "bin/gn" ]; then
+    info "Bootstrapping GN..."
     python tools/git-sync-deps
 fi
 
-echo "Generating Skia build files..."
-"$SKIA_DIR/bin/gn" gen out/Release-x64 --args="
+bin/gn gen out/Release-x64 --args="
 is_official_build=true
 is_debug=false
 skia_enable_tools=false
@@ -58,17 +68,24 @@ skia_use_system_zlib=false
 skia_use_system_freetype2=false
 skia_use_system_harfbuzz=false
 extra_cflags=[\"-O2\"]
-target_cpu=\"x86\"
 "
 
-echo "Building Skia..."
+info "Compiling Skia..."
 ninja -C out/Release-x64
 
-# ---------------------------
-# 3. Build Aseprite
-# ---------------------------
-mkdir -p "$ASEPRITE_DIR/build"
-cd "$ASEPRITE_DIR/build"
+if [ ! -f "$SKIA_DIR/out/Release-x64/include/gpu/GrDirectContext.h" ]; then
+    error "Skia build failed: GPU headers missing."
+fi
+
+info "Skia built successfully!"
+
+# -------------------------------
+# Build Aseprite
+# -------------------------------
+info "Building Aseprite..."
+
+mkdir -p "$BUILD_DIR"
+cd "$BUILD_DIR"
 
 cmake -G "Unix Makefiles" \
   -DLAF_BACKEND=skia \
@@ -77,7 +94,7 @@ cmake -G "Unix Makefiles" \
   -DSKIA_LIBRARY="$SKIA_DIR/out/Release-x64/libskia.a" \
   ..
 
-echo "Building Aseprite..."
+info "Compiling Aseprite..."
 make -j"$NUM_CORES"
 
-echo "Build finished! Aseprite binary is in $ASEPRITE_DIR/build/bin/"
+info "Aseprite built successfully! Binary is in $BUILD_DIR"
