@@ -1,24 +1,108 @@
 #!/bin/bash
 #
+# Enhanced Cross-Distro Update Script
+# Author: Warte
+# Purpose: Safe, automated system update with Timeshift backups
+#
 
-# Set colors
+#==============================
+# 🧩 COLOR DEFINITIONS
+#==============================
 RED=$(tput setaf 1)
 GREEN=$(tput setaf 2)
 YELLOW=$(tput setaf 3)
 BLUE=$(tput setaf 4)
+VIOLET=$(tput setaf 5)
+CYAN=$(tput setaf 6)
 WHITE=$(tput setaf 7)
+GRAY=$(tput setaf 8)
 RESET=$(tput sgr0)
 BOLD=$(tput bold)
 
+#==============================
+# 🧠 SYSTEM INFO DETECTION
+#==============================
+distro="Unknown"
+if [[ -f /etc/os-release ]]; then
+  distro=$(grep PRETTY_NAME /etc/os-release | cut -d= -f2 | tr -d '"')
+fi
+kernel=$(uname -r)
+desktop=${XDG_CURRENT_DESKTOP:-$(echo $DESKTOP_SESSION)}
+cpu_model=$(lscpu | grep "Model name" | sed 's/Model name:\s*//')
+
+#==============================
+# ✨ BANNER
+#==============================
+clear
+echo ""
+echo -e " \e[31m    )                                                      \e[0m"
+echo -e " \e[31m ( /(          )                  (             )          \e[0m"
+echo -e " \e[31m )\\())      ( /(      (           )\\ )    )  ( /(   (      \e[0m"
+echo -e " \e[31m((_)\   (   )\\())     )\\  \`  )   (()/( ( /(  )\\()) ))\\ (   \e[0m"
+echo -e " \e[31m _((_)  )\\ (_))/   _ ((_) /(/(    ((_)))(_))(_))/ /((_))\\  \e[0m"
+echo -e " \e[33m| || | ((_)| |_   | | | |((_)_\\   _| |((_)_ | |_ (_)) ((_) \e[0m"
+echo -e " \e[33m| __ |/ _ \\|  _|  | |_| || '_ \\)/ _\` |/ _\` ||  _|/ -_)(_-< \e[0m"
+echo -e " \e[93m|_||_|\\___/ \\__|   \\___/ | .__/ \\__,_|\\__,_| \\__|\\___|/__/ \e[0m"
+echo -e " \e[93m                         |_|                               \e[0m"
+echo ""
+
+echo -e "\e[31m====================\e[33m====================\e[31m====================\e[0m"
+echo -e "\e[93m           Cross-Distro Safe Updater with Timeshift\e[0m"
+echo -e "\e[31m====================\e[33m====================\e[31m====================\e[0m"
+
+
+echo ""
+echo "${RED}User:${RESET} ${YELLOW}$USER${RESET}  ${GRAY}|  ${RED}Host:${RESET} ${YELLOW}$(hostname)${RESET}"
+echo "${RED}Distro:${RESET} ${YELLOW}$distro${RESET}"
+echo "${RED}Kernel:${RESET} ${YELLOW}$kernel${RESET}"
+echo "${RED}Desktop:${RESET} ${YELLOW}${desktop:-Unknown}${RESET}"
+echo "${RED}CPU:${RESET} ${YELLOW}${cpu_model:-Unknown}${RESET}"
+echo "${GRAY}-------------------------------------------------------------${RESET}"
+echo ""
+
+#==============================
+# ⚙️  LOGGING
+#==============================
+logdir="$HOME/.local/logs"
+mkdir -p "$logdir"
+logfile="$logdir/update-$(date +%Y-%m-%d_%H-%M-%S).log"
+exec > >(tee -a "$logfile") 2>&1
+
+echo "${RED}Logging to: ${YELLOW}$logfile${RESET}"
+echo ""
+
+#==============================
+# 🧭 PRE-FLIGHT CHECKS
+#==============================
 # Ensure admin privileges
 if ! sudo -v; then
   echo "${RED}Error: ${WHITE}Admin privileges required. Exiting.${RESET}"
   exit 1
 fi
 
-# Function to rank mirrors
+# Check Internet connectivity
+if ! ping -c 1 archlinux.org &>/dev/null && ! ping -c 1 google.com &>/dev/null; then
+  echo "${RED}Error:${WHITE} No Internet connection detected. Exiting.${RESET}"
+  exit 1
+fi
+
+#==============================
+# 🔁 RETRY SAFETY
+#==============================
+MAX_RETRIES=2
+RETRY_COUNT=${RETRY_COUNT:-0}
+(( RETRY_COUNT++ ))
+export RETRY_COUNT
+if (( RETRY_COUNT > MAX_RETRIES )); then
+  echo "${RED}Too many retries, exiting.${RESET}"
+  exit 1
+fi
+
+#==============================
+# 🪞 MIRROR RANKING
+#==============================
 rank_mirrors() {
-  if command -v reflector &> /dev/null; then
+  if command -v reflector &>/dev/null; then
     echo "${GREEN}<<< ${BLUE}Ranking Mirrors... ${GREEN}>>>${RESET}"
     sudo reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist
   else
@@ -26,20 +110,20 @@ rank_mirrors() {
   fi
 }
 
-# Function to check updates
+#==============================
+# 🔍 UPDATE CHECK
+#==============================
 check_updates() {
   echo "${GREEN}<<< ${BLUE}Checking for available updates... ${GREEN}>>>${RESET}"
 
-  if command -v checkupdates &> /dev/null; then
-    # For Arch-based systems
+  if command -v checkupdates &>/dev/null; then
     updates=$(checkupdates 2>/dev/null)
     package_manager="pacman"
-  elif command -v apt &> /dev/null; then
-    # For Ubuntu-based systems
+  elif command -v apt &>/dev/null; then
     updates=$(apt list --upgradable 2>/dev/null | grep -v "Listing...")
     package_manager="apt"
   else
-    echo "${RED}Error: ${WHITE}No supported package manager found.${RESET}"
+    echo "${RED}Error:${WHITE} No supported package manager found.${RESET}"
     exit 1
   fi
 
@@ -52,44 +136,61 @@ check_updates() {
   echo "$updates"
 }
 
-# Function to perform a backup
+#==============================
+# 💾 BACKUP FUNCTION
+#==============================
 perform_backup() {
-  if command -v timeshift &> /dev/null; then
+  if command -v timeshift &>/dev/null; then
     echo "${GREEN}Creating Timeshift backup...${RESET}"
-    sudo timeshift --create --comments "Auto backup (update script)" --tags D || {
-      echo "${RED}Backup failed. Check Timeshift settings.${RESET}"
-      exit 1
-    }
+    sudo timeshift --create \
+      --comments "Auto backup before update ($(date '+%Y-%m-%d %H:%M:%S'))" \
+      --tags D || {
+        echo "${RED}Backup failed. Check Timeshift settings.${RESET}"
+        exit 1
+      }
   else
     echo "${YELLOW}Timeshift not installed. Skipping backup.${RESET}"
   fi
 }
 
-# Function to update the system
+#==============================
+# 🔧 SYSTEM UPDATE
+#==============================
 update_system() {
   if [[ "$package_manager" == "pacman" ]]; then
+    # CachyOS sync (if available)
+    if command -v cachyos-update &>/dev/null; then
+      echo "${GREEN}<<< ${BLUE}Running CachyOS system sync... ${GREEN}>>>${RESET}"
+      sudo cachyos-update --no-confirm
+    fi
+
+    # Keyring refresh
+    echo "${GREEN}Refreshing keyrings...${RESET}"
+    sudo pacman -Sy archlinux-keyring chaotic-keyring --noconfirm || true
+
     echo "${GREEN}<<< ${BLUE}Updating Pacman... ${GREEN}>>>${RESET}"
     if ! sudo pacman -Syu --noconfirm; then
       echo "${YELLOW}Update failed. Attempting to rank mirrors...${RESET}"
       rank_mirrors
-      read -p "${BOLD}${WHITE}Would you like to retry the update? (Y/n): " retry_choice
-      retry_choice=${retry_choice:-Y}  # Default to "Y" if no input is given
+      read -p "${BOLD}${WHITE}Retry update? (Y/n): " retry_choice
+      retry_choice=${retry_choice:-Y}
       if [[ "$retry_choice" =~ ^[Yy]$ ]]; then
-        echo "${GREEN}Retrying update...${RESET}"
-        exec "$0" "$@"  # Restart the script with the same arguments
+        exec "$0" "$@"
       else
         echo "${YELLOW}Update aborted by user.${RESET}"
         exit 1
       fi
     fi
 
-    if command -v yay &> /dev/null; then
+    # AUR
+    if command -v yay &>/dev/null; then
       echo "${GREEN}<<< ${BLUE}Updating AUR (yay)... ${GREEN}>>>${RESET}"
       yay -Syu --noconfirm
-    elif command -v paru &> /dev/null; then
+    elif command -v paru &>/dev/null; then
       echo "${GREEN}<<< ${BLUE}Updating AUR (paru)... ${GREEN}>>>${RESET}"
       paru -Syu --noconfirm
     fi
+
   elif [[ "$package_manager" == "apt" ]]; then
     echo "${GREEN}<<< ${BLUE}Updating APT Packages... ${GREEN}>>>${RESET}"
     sudo dpkg --add-architecture i386
@@ -97,185 +198,275 @@ update_system() {
     sudo apt autoremove -y
   fi
 
-  # Flatpak updates
-  if command -v flatpak &> /dev/null; then
+  # Flatpak
+  if command -v flatpak &>/dev/null; then
     echo "${GREEN}<<< ${BLUE}Updating Flatpaks... ${GREEN}>>>${RESET}"
     sudo flatpak update -y
   fi
 
-  # Snap updates
-  if command -v snap &> /dev/null; then
+  # Snap
+  if command -v snap &>/dev/null; then
     echo "${GREEN}<<< ${BLUE}Updating Snaps... ${GREEN}>>>${RESET}"
     sudo snap refresh
   fi
+
+  # Post-cleanup
+  if command -v paccache &>/dev/null; then
+    echo "${GREEN}Cleaning package cache...${RESET}"
+    sudo paccache -rk2
+  fi
 }
 
-# Main script execution
+#==============================
+# 🚀 EXECUTION
+#==============================
 check_updates
 
-# Ask user about backup
-read -p "${BOLD}${WHITE}Would you like to perform a backup based on these updates? (Y/n): " backup_choice
+read -p "${BOLD}${WHITE}Perform Timeshift backup before update? (Y/n): " backup_choice
 backup_choice=${backup_choice:-Y}
-
 if [[ "$backup_choice" =~ ^[Yy]$ ]]; then
   perform_backup
 else
   echo "${YELLOW}Backup skipped by user.${RESET}"
 fi
 
-# Proceed with updates
 update_system
 
-echo "${GREEN}System update complete.${RESET}"
+# Post-update snapshot
+if command -v timeshift &>/dev/null; then
+  echo "${GREEN}Creating post-update snapshot...${RESET}"
+  sudo timeshift --create \
+    --comments "Post-update snapshot ($(date '+%Y-%m-%d %H:%M:%S'))" \
+    --tags D || echo "${YELLOW}Post-update snapshot skipped.${RESET}"
+fi
+
+# Prune logs older than 14 days
+find "$logdir" -type f -name "update-*.log" -mtime +14 -delete
+
+echo ""
+echo "${BLUE}=============================================================${RESET}"
+echo "${GREEN}System update complete!${RESET}"
+echo "${WHITE}Log saved to:${RESET} ${YELLOW}$logfile${RESET}"
+echo "${BLUE}=============================================================${RESET}"
+
+RESET=$(tput sgr0)
+BOLD=$(tput bold)
+
+#==============================
+# ✨ BANNER
+#==============================
+clear
+echo ""
+echo -e " \e[31m    )                                                      \e[0m"
+echo -e " \e[31m ( /(          )                  (             )          \e[0m"
+echo -e " \e[31m )\\())      ( /(      (           )\\ )    )  ( /(   (      \e[0m"
+echo -e " \e[31m((_)\   (   )\\())     )\\  \`  )   (()/( ( /(  )\\()) ))\\ (   \e[0m"
+echo -e " \e[31m _((_)  )\\ (_))/   _ ((_) /(/(    ((_)))(_))(_))/ /((_))\\  \e[0m"
+echo -e " \e[33m| || | ((_)| |_   | | | |((_)_\\   _| |((_)_ | |_ (_)) ((_) \e[0m"
+echo -e " \e[33m| __ |/ _ \\|  _|  | |_| || '_ \\)/ _\` |/ _\` ||  _|/ -_)(_-< \e[0m"
+echo -e " \e[93m|_||_|\\___/ \\__|   \\___/ | .__/ \\__,_|\\__,_| \\__|\\___|/__/ \e[0m"
+echo -e " \e[93m                         |_|                               \e[0m"
+echo ""
+
+echo -e "\e[31m====================\e[33m====================\e[31m====================\e[0m"
+echo -e "\e[93m           Cross-Distro Safe Updater with Timeshift\e[0m"
+echo -e "\e[31m====================\e[33m====================\e[31m====================\e[0m"
 
 
-# #!/bin/bash
-#
-# # Set Colors
-# RED=$(tput setaf 1)
-# GREEN=$(tput setaf 2)
-# YELLOW=$(tput setaf 3)
-# BLUE=$(tput setaf 4)
-# MAGENTA=$(tput setaf 5)
-# CYAN=$(tput setaf 6)
-# WHITE=$(tput setaf 7)
-# RESET=$(tput sgr0)
-#
-# # Print colored output
-# # echo "${RED}Error:${RESET} Something went wrong."
-# # echo "${GREEN}Success:${RESET} Operation completed successfully."
-# # echo "${YELLOW}Warning:${RESET} Proceed with caution."
-#
-# # ensure admin privileges
-# sudo echo
-#
-#
-# # Check for updates using checkupdates
-# echo "Checking for available updates..."
-# updates=$(checkupdates 2>/dev/null)
-#
-# # If no updates are found
-# if [[ -z "$updates" ]]; then
-#   echo "No updates available."
-#   exit 0
-# fi
-#
-# # If updates are found, display them
-# echo "Updates available:"
-# echo "$updates"
-#
-#
-# ##########
-# # BACKUP #
-# ##########
-#
-# # Prompt the user
-# read -p "Would you like to perform a backup before updating? (Y/n): " backup_choice
-# backup_choice=${backup_choice:-Y}  # Default to "Y" if no input is given
-#
-# # Check user response
-# if [[ "$backup_choice" =~ ^[Yy]$ ]]; then
-#   # Code to perform the backup
-#   echo "Backup option selected."
-#
-#   # Check if Timeshift is installed
-#   if command -v timeshift &> /dev/null; then
-#     echo "Creating a Timeshift backup..."
-#     sudo timeshift --create --comments "Auto backup (update script)" --tags D
-#     if [ $? -eq 0 ]; then
-#       echo "Backup completed successfully."
-#     else
-#       echo "Backup failed. Please check Timeshift settings." >&2
-#       exit 1
-#     fi
-#   else
-#     echo "Timeshift not installed. Skipping backup."
-#   fi
-# else
-#   echo "Skipping backup."
-# fi
-#
-# # Proceed with the rest of the script
-# echo "Proceeding with the update..."
-#
-#
-# # apt is present?
-# if command -v apt &> /dev/null; then
-#   # ensure the 32-bit stuff is good to go for steam
-#   sudo dpkg --add-architecture i386
-#
-#   echo "${GREEN}<<<${BLUE}===== ${WHITE}UPDATING APTS${BLUE}=====${GREEN}>>>${RESET}"
-#   echo ""
-#   echo "${YELLOW}sudo apt update${RESET}"
-#   echo ""
-#   sudo apt update
-#   echo ""
-#   echo "${GREEN}<<<${BLUE}===== ${WHITE}UPGRADING APTS${BLUE}=====${GREEN}>>>${RESET}"
-#   echo ""
-#   echo "${YELLOW}sudo apt upgrade -y${RESET}"
-#   echo ""
-#   sudo apt upgrade -y
-#   echo ""
-# fi
-#
-# # pacman is present
-# if command -v pacman &> /dev/null; then
-#   echo "${GREEN}<<<${BLUE}===== ${WHITE} UPDATING PACMAN${BLUE} =====${GREEN}>>>$RESET"
-#   echo ""
-#   echo "${YELLOW}sudo pacman -Syu ${RESET}"
-#   echo ""
-#   sudo pacman -Syu
-#   echo ""
-# fi
-#
-# # yay is present
-# if command -v yay &> /dev/null; then
-#   echo "${GREEN}<<<${BLUE}===== ${WHITE}UPDATING YAY${BLUE}=====${GREEN}>>>${RESET}"
-#   echo ""
-#   echo "${YELLOW} yay -Syu ${RESET}"
-#   echo ""
-#   yay -Syu
-#   echo ""
-# elif command -v paru &> /dev/null; then
-#   echo "${GREEN}<<<${BLUE}===== ${WHITE}UPDATING PARU${BLUE}=====${GREEN}>>>${RESET}"
-#   echo ""
-#   echo "${YELLOW}paru -Syu ${RESET}"
-#   echo ""
-#   paru -Syu
-#   echo ""
-# fi
-#
-# # flatpak is installed?
-# if command -v flatpak &> /dev/null; then
-#   #sudo flatpak update -y
-#   echo "${GREEN}<<${BLUE}== ${WHITE}UPDATING FLATPAKS ${BLUE}==${GREEN}>>${RESET}"
-#   echo ""
-#   echo "${YELLOW}sudo flatpak update -y${RESET}"
-#   echo ""
-#   sudo flatpak update -y
-#   if command -v apt &> /dev/null; then
-#     sudo apt autoremove
-#   fi
-#   echo ""
-# else
-#   echo "${GREEN}<<<${BLUE}=== ${WHITE}FLATPAK IS NOT INSTALLED ${BLUE}===${GREEN}>>>${RESET}"
-#   echo ""
-# fi
-#
-# #sudo snap refresh
-# if command -v snap &> /dev/null; then
-#   echo "${GREEN}<<<${BLUE}=== ${WHITE}UPDATING SNAPS ${BLUE}===${GREEN}>>>${RESET}"
-#   echo ""
-#   echo "${YELLOW}sudo snap refresh${RESET}"
-#   echo ""
-#   sudo snap refresh --list
-#   sudo snap refresh
-# else
-# #  echo "${GREEN}<<<${BLUE}=== ${WHITE}SNAP IS NOT INSTALLED ${BLUE}===${GREEN}>>>${RESET}"
-# #  echo ""
-# #  echo "${YELLOW}Skipping 'sudo snap refresh'...${RESET}"
-#   echo ""
-# fi
-#
-# # Continue with the rest of the script
-# echo "${GREEN}Update Complete...${RESET}"
+echo ""
+echo "${RED}User:${RESET} ${YELLOW}$USER${RESET}  ${GRAY}|  ${RED}Host:${RESET} ${YELLOW}$(hostname)${RESET}"
+echo "${RED}Distro:${RESET} ${YELLOW}$distro${RESET}"
+echo "${RED}Kernel:${RESET} ${YELLOW}$kernel${RESET}"
+echo "${RED}Desktop:${RESET} ${YELLOW}${desktop:-Unknown}${RESET}"
+echo "${RED}CPU:${RESET} ${YELLOW}${cpu_model:-Unknown}${RESET}"
+echo "${GRAY}-------------------------------------------------------------${RESET}"
+echo ""
+
+#==============================
+# ⚙️  LOGGING
+#==============================
+logdir="$HOME/.local/logs"
+mkdir -p "$logdir"
+logfile="$logdir/update-$(date +%Y-%m-%d_%H-%M-%S).log"
+exec > >(tee -a "$logfile") 2>&1
+
+echo "${GREEN}Logging to: ${YELLOW}$logfile${RESET}"
+echo ""
+
+#==============================
+# 🧭 PRE-FLIGHT CHECKS
+#==============================
+# Ensure admin privileges
+if ! sudo -v; then
+  echo "${RED}Error: ${WHITE}Admin privileges required. Exiting.${RESET}"
+  exit 1
+fi
+
+# Check Internet connectivity
+if ! ping -c 1 archlinux.org &>/dev/null && ! ping -c 1 google.com &>/dev/null; then
+  echo "${RED}Error:${WHITE} No Internet connection detected. Exiting.${RESET}"
+  exit 1
+fi
+
+#==============================
+# 🔁 RETRY SAFETY
+#==============================
+MAX_RETRIES=2
+RETRY_COUNT=${RETRY_COUNT:-0}
+(( RETRY_COUNT++ ))
+export RETRY_COUNT
+if (( RETRY_COUNT > MAX_RETRIES )); then
+  echo "${RED}Too many retries, exiting.${RESET}"
+  exit 1
+fi
+
+#==============================
+# 🪞 MIRROR RANKING
+#==============================
+rank_mirrors() {
+  if command -v reflector &>/dev/null; then
+    echo "${GREEN}<<< ${BLUE}Ranking Mirrors... ${GREEN}>>>${RESET}"
+    sudo reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist
+  else
+    echo "${YELLOW}Reflector not installed. Skipping mirror ranking.${RESET}"
+  fi
+}
+
+#==============================
+# 🔍 UPDATE CHECK
+#==============================
+check_updates() {
+  echo "${GREEN}<<< ${BLUE}Checking for available updates... ${GREEN}>>>${RESET}"
+
+  if command -v checkupdates &>/dev/null; then
+    updates=$(checkupdates 2>/dev/null)
+    package_manager="pacman"
+  elif command -v apt &>/dev/null; then
+    updates=$(apt list --upgradable 2>/dev/null | grep -v "Listing...")
+    package_manager="apt"
+  else
+    echo "${RED}Error:${WHITE} No supported package manager found.${RESET}"
+    exit 1
+  fi
+
+  if [[ -z "$updates" ]]; then
+    echo "No updates available."
+    exit 0
+  fi
+
+  echo "Updates available:"
+  echo "$updates"
+}
+
+#==============================
+# 💾 BACKUP FUNCTION
+#==============================
+perform_backup() {
+  if command -v timeshift &>/dev/null; then
+    echo "${GREEN}Creating Timeshift backup...${RESET}"
+    sudo timeshift --create \
+      --comments "Auto backup before update ($(date '+%Y-%m-%d %H:%M:%S'))" \
+      --tags D || {
+        echo "${RED}Backup failed. Check Timeshift settings.${RESET}"
+        exit 1
+      }
+  else
+    echo "${YELLOW}Timeshift not installed. Skipping backup.${RESET}"
+  fi
+}
+
+#==============================
+# 🔧 SYSTEM UPDATE
+#==============================
+update_system() {
+  if [[ "$package_manager" == "pacman" ]]; then
+    # CachyOS sync (if available)
+    if command -v cachyos-update &>/dev/null; then
+      echo "${GREEN}<<< ${BLUE}Running CachyOS system sync... ${GREEN}>>>${RESET}"
+      sudo cachyos-update --no-confirm
+    fi
+
+    # Keyring refresh
+    echo "${GREEN}Refreshing keyrings...${RESET}"
+    sudo pacman -Sy archlinux-keyring chaotic-keyring --noconfirm || true
+
+    echo "${GREEN}<<< ${BLUE}Updating Pacman... ${GREEN}>>>${RESET}"
+    if ! sudo pacman -Syu --noconfirm; then
+      echo "${YELLOW}Update failed. Attempting to rank mirrors...${RESET}"
+      rank_mirrors
+      read -p "${BOLD}${WHITE}Retry update? (Y/n): " retry_choice
+      retry_choice=${retry_choice:-Y}
+      if [[ "$retry_choice" =~ ^[Yy]$ ]]; then
+        exec "$0" "$@"
+      else
+        echo "${YELLOW}Update aborted by user.${RESET}"
+        exit 1
+      fi
+    fi
+
+    # AUR
+    if command -v yay &>/dev/null; then
+      echo "${GREEN}<<< ${BLUE}Updating AUR (yay)... ${GREEN}>>>${RESET}"
+      yay -Syu --noconfirm
+    elif command -v paru &>/dev/null; then
+      echo "${GREEN}<<< ${BLUE}Updating AUR (paru)... ${GREEN}>>>${RESET}"
+      paru -Syu --noconfirm
+    fi
+
+  elif [[ "$package_manager" == "apt" ]]; then
+    echo "${GREEN}<<< ${BLUE}Updating APT Packages... ${GREEN}>>>${RESET}"
+    sudo dpkg --add-architecture i386
+    sudo apt update && sudo apt upgrade -y
+    sudo apt autoremove -y
+  fi
+
+  # Flatpak
+  if command -v flatpak &>/dev/null; then
+    echo "${GREEN}<<< ${BLUE}Updating Flatpaks... ${GREEN}>>>${RESET}"
+    sudo flatpak update -y
+  fi
+
+  # Snap
+  if command -v snap &>/dev/null; then
+    echo "${GREEN}<<< ${BLUE}Updating Snaps... ${GREEN}>>>${RESET}"
+    sudo snap refresh
+  fi
+
+  # Post-cleanup
+  if command -v paccache &>/dev/null; then
+    echo "${GREEN}Cleaning package cache...${RESET}"
+    sudo paccache -rk2
+  fi
+}
+
+#==============================
+# 🚀 EXECUTION
+#==============================
+check_updates
+
+read -p "${BOLD}${WHITE}Perform Timeshift backup before update? (Y/n): " backup_choice
+backup_choice=${backup_choice:-Y}
+if [[ "$backup_choice" =~ ^[Yy]$ ]]; then
+  perform_backup
+else
+  echo "${YELLOW}Backup skipped by user.${RESET}"
+fi
+
+update_system
+
+# Post-update snapshot
+if command -v timeshift &>/dev/null; then
+  echo "${GREEN}Creating post-update snapshot...${RESET}"
+  sudo timeshift --create \
+    --comments "Post-update snapshot ($(date '+%Y-%m-%d %H:%M:%S'))" \
+    --tags D || echo "${YELLOW}Post-update snapshot skipped.${RESET}"
+fi
+
+# Prune logs older than 14 days
+find "$logdir" -type f -name "update-*.log" -mtime +14 -delete
+
+echo ""
+echo "${BLUE}=============================================================${RESET}"
+echo "${GREEN}System update complete!${RESET}"
+echo "${WHITE}Log saved to:${RESET} ${YELLOW}$logfile${RESET}"
+echo "${BLUE}=============================================================${RESET}"
