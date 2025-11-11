@@ -95,6 +95,18 @@ function work() {
 # }
 
 
+sdom() {
+    local SDOM_SCRIPTS_DIR="$HOME/Documents/GitHub/SDOM/scripts"
+    if [[ -d "$SDOM_SCRIPTS_DIR" ]]; then
+        cd "$(dirname "$SDOM_SCRIPTS_DIR")" || {
+            echo "❌ Failed to cd to parent."
+            return 1
+        }
+    else
+        echo "❌ Directory not found: $SDOM_SCRIPTS_DIR"
+        return 1
+    fi
+}
 
 
 
@@ -274,7 +286,7 @@ export PROTON_ENABLE_WAYLAND=1
 #                                                                                #
 # Available Colors:                                                              #
 #   blue, green, red, violet, brown, teal, purple, olive, gray, or default       #
-#                                                                                #
+#                                     bash: /: Is a directory                                           #
 ##################################################################################
 
 # Check if 'hostname' command exists, if not try to install it
@@ -316,4 +328,15 @@ if command -v starship > /dev/null 2>&1; then
         sed -i 's/^palette = .*/palette = "green"/' $STARSHIP_TOML
     fi
     eval "$(starship init bash)"
+fi
+
+
+# --- SDOM Scripts Path Integration -----------------------------
+SDOM_SCRIPTS_DIR="$HOME/Documents/GitHub/SDOM/scripts"
+
+if [[ -d "$SDOM_SCRIPTS_DIR" ]]; then
+    # Only add to PATH if it exists and isn’t already included
+    if [[ ":$PATH:" != *":$SDOM_SCRIPTS_DIR:"* ]]; then
+        export PATH="$PATH:$SDOM_SCRIPTS_DIR"
+    fi
 fi
