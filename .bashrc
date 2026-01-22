@@ -286,8 +286,9 @@ export PROTON_ENABLE_WAYLAND=1
 #                                  |_|                               |_|         #
 #                                                                                #
 # Available Colors:                                                              #
-#   blue, green, red, violet, brown, teal, purple, olive, gray, or default       #
-#                                     bash: /: Is a directory                                           #
+#   blue, crimson, green, red, violet, brown, teal,                              #
+#   purple, olive, gray, or default                                              #
+#                                     bash: /: Is a directory                    #
 ##################################################################################
 
 # Check if 'hostname' command exists, if not try to install it
@@ -312,6 +313,9 @@ if command -v starship > /dev/null 2>&1; then
 
     elif [[ "$(hostname)" == "framework" ]]; then
         sed -i 's/^palette = .*/palette = "teal"/' $STARSHIP_TOML
+
+    elif [[ "$(hostname)" == "mira-red" ]]; then
+        sed -i 's/^palette = .*/palette = "brown"/' $STARSHIP_TOML
 
     elif [[ "$(hostname)" == "tux" ]]; then
         sed -i 's/^palette = .*/palette = "olive"/' $STARSHIP_TOML
