@@ -138,7 +138,7 @@ shopt -s histappend                     # Append to history, don't overwrite
 #  Alias Definitions
 #
 #alias ll='ls -alF --color=auto'
-alias ll='eza -al'
+alias ll='eza -al --icons=auto'
 alias ezd='eza -l --time=created --sort=created /home/jay/Documents/GitHub/SDOM/docs'
 alias l='eza -;'
 alias la='ls -A --color=auto'
