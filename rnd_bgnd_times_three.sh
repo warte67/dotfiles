@@ -16,7 +16,10 @@ left_height=2560
 
 middle_base_width=3840
 middle_base_height=2160
-dpi_scaling_factor=0.847
+dpi_scaling_factor=0.8
+
+middle_y_adjust=50
+right_y_adjust=-25
 
 # Calculate the scaled dimensions for the middle monitor
 middle_width=$(echo "$middle_base_width * $dpi_scaling_factor" | bc)
@@ -34,7 +37,7 @@ input_image=$(find "$raw_dir" -type f -name "*.jpg" | shuf -n 1)
 
 # Exit if no image is found
 if [ -z "$input_image" ]; then
-  echo "No .jpg files found in $raw_dir."
+  echo "No .jpg files fmiddle_y_offset=$(echo "($height - $middle_height) / 2" | bc)  # Vertically centeredound in $raw_dir."
   exit 1
 fi
 
@@ -54,12 +57,16 @@ magick "$working_dir/$base_filename-resized.jpg" -crop ${left_width}x${left_heig
 
 # Crop and scale middle section (scaled by DPI factor)
 middle_x_offset=$left_width  # Middle section starts right after the left monitor
-middle_y_offset=$(echo "($height - $middle_height) / 2" | bc)  # Vertically centered
+# middle_y_offset=$(echo "($height - $middle_height) / 2" | bc)  # Vertically centered
+middle_y_offset=$(echo "(($height - $middle_height) / 2) + $middle_y_adjust" | bc)
+
 magick "$working_dir/$base_filename-resized.jpg" -crop ${middle_width}x${middle_height}+$middle_x_offset+$middle_y_offset "$middle_output"
 
 # Crop right section (2560x1440)
 right_x_offset=$(echo "$left_width + $middle_width" | bc)  # Right section starts after the middle monitor
-right_y_offset=$(echo "$middle_y_offset + $middle_height - $right_height" | bc)  # Bottom-aligned with middle
+# right_y_offset=$(echo "$middle_y_offset + $middle_height - $right_height" | bc)  # Bottom-aligned with middle
+right_y_offset=$(echo "$middle_y_offset + $middle_height - $right_height + $right_y_adjust" | bc)
+
 magick "$working_dir/$base_filename-resized.jpg" -crop ${right_width}x${right_height}+$right_x_offset+$right_y_offset "$right_output"
 
 # Clean up the resized image
@@ -68,7 +75,7 @@ rm "$working_dir/$base_filename-resized.jpg"
 # Define monitor output names
 monitor_left="HDMI-A-1"
 monitor_middle="DP-1"
-monitor_right="DP-2"
+monitor_right="HDMI-A-2"
 
 # Set wallpapers for each monitor using swaybg
 swaybg -o "$monitor_left" -i "$left_output" -m fill &
