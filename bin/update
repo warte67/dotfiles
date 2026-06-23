@@ -111,6 +111,29 @@ if (( TOTAL_UPDATES == 0 )); then
 fi
 
 #=================================
+# Timeshift Snapshot
+#=================================
+
+if (( APT_UPDATES > 0 )) && command -v timeshift >/dev/null 2>&1; then
+
+    echo ""
+    read -rp "Create Timeshift snapshot before updating? [y/N] " CREATE_SNAPSHOT
+
+    if [[ "$CREATE_SNAPSHOT" =~ ^[Yy]$ ]]; then
+
+        echo ""
+        echo "${GREEN}≣ Creating Timeshift Snapshot${RESET}"
+
+        sudo timeshift --create \
+            --comments "Pre-Update $(date '+%Y-%m-%d %H:%M')" \
+            --tags D
+
+        echo ""
+        echo "${GREEN}Snapshot complete.${RESET}"
+    fi
+fi
+
+#=================================
 # Updates
 #=================================
 
