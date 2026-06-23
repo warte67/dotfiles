@@ -13,6 +13,10 @@ GREEN=$(tput setaf 2)
 CYAN=$(tput setaf 6)
 YELLOW=$(tput setaf 3)
 RED=$(tput setaf 1)
+GRAY=$(tput setaf 8)
+BLUE=$(tput setaf 4)
+WHITE=$(tput setaf 7)
+
 
 #=================================
 # System Information
@@ -41,7 +45,22 @@ fi
 # Banner
 #=================================
 
-clear
+# clear
+
+echo "${WHITE}"
+echo -e "      ████  ██████ ████  █  ████  ██████      "
+echo -e "      █   █ █      █   █ █  █   █ █    █      ${GRAY}"
+echo -e "      ██  █ ███    █████ ██ █████ ██   █      ${CYAN}"
+echo -e "      ██  █ ██     ██  █ ██ ██  █ ██   █      ${BLUE}"
+echo -e "      █████ ██████ █████ ██ ██  █ ██   █      ${WHITE}"
+echo -e "                                              "
+echo -e " █    █ █████ ████  ████  █████ ██████ █████  "
+echo -e " █    █ █   █ █   █ █   █   █   █      █   █  ${GRAY}"
+echo -e " ██   █ █████ ██  █ █████   ██  ███    ██████ ${CYAN}"
+echo -e " ██   █ ██    ██  █ ██  █   ██  ██     ██   █ ${BLUE}"
+echo -e " ██████ ██    █████ ██  █   ██  ██████ ██   █ ${WHITE}"
+echo ""
+
 echo ""
 echo "${GREEN}≣ Debian Workstation Updater${RESET}"
 echo ""
