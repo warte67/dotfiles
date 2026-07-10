@@ -82,6 +82,11 @@ swaybg -o "$monitor_left" -i "$left_output" -m fill &
 swaybg -o "$monitor_middle" -i "$middle_output" -m fill &
 swaybg -o "$monitor_right" -i "$right_output" -m fill &
 
+# Tell DMS about the wallpapers
+dms ipc call wallpaper setFor "$monitor_left" "$left_output"
+dms ipc call wallpaper setFor "$monitor_middle" "$middle_output"
+dms ipc call wallpaper setFor "$monitor_right" "$right_output"
+
 echo "Wallpapers set:"
 echo "Left monitor: $left_output"
 echo "Middle monitor: $middle_output"
